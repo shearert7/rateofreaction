@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rate of Reaction: Practical Evaluation & Modification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.2/dist/chartjs-plugin-annotation.min.js"></script>
+
+<style>
+  :root{
+    --paper:#EEF0E6;
+    --paper-deep:#E3E7D6;
+    --ink:#1E2A24;
+    --ink-soft:#4B5A50;
+    --teal:#164C43;
+    --teal-deep:#0E362F;
+    --rust:#C1502E;
+    --rust-soft:#F1DACB;
+    --sage:#6B8F71;
+    --sage-soft:#DCE6D6;
+    --amber:#B8842E;
+    --amber-soft:#F1E2C3;
+    --line:#C7CDBC;
+    --white:#FBFBF7;
+    --correct:#15803D;
+    --incorrect:#B91C1C;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif; line-height:1.55;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:36px 36px; opacity:0.28;
+  }
+  h1,h2,h3,h4{ font-family:'Space Grotesk', sans-serif; font-weight:600; color:var(--teal-deep); margin:0; }
+  .wrap{ position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 24px 40px; }
+  
+  header.hero{ padding:24px 0 16px; border-bottom:1px solid var(--line); }
+  .eq-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace; font-size:13px;
+    background:var(--white); border:1px solid var(--line);
+    padding:5px 12px; border-radius:3px; color:var(--ink-soft); margin-bottom:10px;
+  }
+  h1.title{ font-size:clamp(26px,3.5vw,40px); line-height:1.1; }
+  .title .accent{ color:var(--rust); }
+  p.subtitle{ max-width:68ch; color:var(--ink-soft); font-size:14.5px; margin-top:4px; }
+
+  .tab-nav{
+    display:flex; gap:8px; margin-top:20px; border-bottom:2px solid var(--line);
+    overflow-x:auto; padding-bottom:1px;
+  }
+  .tab-btn{
+    background:var(--paper-deep); border:1px solid var(--line); border-bottom:none;
+    padding:10px 18px; border-radius:6px 6px 0 0; font-family:'Space Grotesk', sans-serif;
+    font-weight:600; font-size:14px; color:var(--ink-soft); cursor:pointer; transition:all 0.15s ease;
+    white-space:nowrap;
+  }
+  .tab-btn:hover{ background:var(--white); color:var(--teal-deep); }
+  .tab-btn.active{
+    background:var(--white); color:var(--rust); border-color:var(--line);
+    border-top:3px solid var(--rust); margin-bottom:-2px; padding-bottom:11px;
+  }
+
+  .tab-content{ display:none; padding-top:20px; }
+  .tab-content.active{ display:block; }
+
+  .doc-card{ background:var(--white); border:1.5px solid var(--teal); border-radius:6px; padding:24px; margin-bottom:20px; }
+  .doc-grid{ display:grid; grid-template-columns:1fr 380px; gap:24px; }
+  @media (max-width:850px){ .doc-grid{ grid-template-columns:1fr; } }
+  
+  .diagram-box{ background:var(--white); border:1px solid var(--line); border-radius:6px; padding:12px; text-align:center; }
+  .diagram-box img{ max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto; }
+  .diagram-caption{ font-size:12px; color:var(--ink-soft); font-weight:500; margin-top:8px; }
+
+  .spec-list{ margin:8px 0 16px 20px; padding:0; font-size:14px; }
+  .spec-list li{ margin-bottom:4px; }
+
+  .data-section{ background:var(--white); border:1.5px solid var(--teal); border-radius:6px; padding:20px; }
+  .data-grid{ display:grid; grid-template-columns:320px 1fr; gap:20px; margin-top:16px; }
+  @media (max-width:950px){ .data-grid{ grid-template-columns:1fr; } }
+
+  .table-container{ border:1px solid var(--line); border-radius:4px; background:var(--white); }
+  .data-table{ width:100%; border-collapse:collapse; font-size:12px; text-align:center; }
+  .data-table th{ background:var(--teal-deep); color:var(--white); font-weight:500; padding:6px 4px; font-family:'Space Grotesk',sans-serif; }
+  .data-table td{ padding:3px 4px; border-bottom:1px solid var(--line); }
+  .data-table td.time-cell{ font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--ink-soft); background:var(--paper); }
+  .data-table input[type="number"]{
+    width:100%; max-width:55px; padding:2px 4px; text-align:center; border:1px solid var(--line);
+    border-radius:3px; font-family:'IBM Plex Mono',monospace; font-size:12px;
+  }
+  .data-table input:focus{ outline:none; border-color:var(--rust); background:var(--rust-soft); }
+
+  .graph-container{ background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:12px; position:relative; min-height:480px; }
+  
+  .calc-card{
+    background:var(--paper-deep); border-left:4px solid var(--rust); border-radius:0 6px 6px 0;
+    padding:16px 20px; margin-top:20px; display:flex; flex-direction:column; gap:16px;
+  }
+  .slider-control{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .slider-control label{ font-size:14.5px; color:var(--teal-deep); }
+  .slider-control input[type="range"]{ flex:1; min-width:200px; accent-color:var(--rust); cursor:pointer; }
+  .slider-val-badge{
+    font-family:'IBM Plex Mono',monospace; font-weight:600; background:var(--white);
+    border:1px solid var(--line); padding:4px 10px; border-radius:4px; color:var(--rust);
+  }
+
+  .calc-results{ display:flex; gap:20px; flex-wrap:wrap; }
+  .rate-badge{ flex:1; min-width:280px; background:var(--white); border:1px solid var(--line); padding:14px; border-radius:6px; }
+  .rate-badge .lbl{ font-size:11px; font-family:'IBM Plex Mono',monospace; text-transform:uppercase; color:var(--ink-soft); }
+  .rate-badge .val{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; color:var(--teal-deep); margin-top:2px; }
+  
+  .working-box{
+    margin-top:10px; padding:10px; background:var(--paper); border:1px solid var(--line);
+    border-radius:4px; font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.5; color:var(--ink);
+  }
+  .working-box .formula{ font-weight:600; color:var(--teal-deep); margin-bottom:4px; }
+
+  .bg-summary-box{ background:var(--white); border:1.5px solid var(--teal); border-radius:6px; padding:20px; margin-bottom:24px; }
+  .concept-card{ background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:14px 18px; margin-top:12px; }
+  .concept-card h4{ color:var(--teal-deep); margin-bottom:6px; font-size:15px; }
+  
+  .diagram-flex-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
+  @media (max-width:768px){ .diagram-flex-grid{ grid-template-columns:1fr; } }
+  .diagram-card-item{ background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:12px; text-align:center; }
+  .diagram-card-item img{ width:100%; height:auto; max-height:380px; object-fit:contain; border-radius:4px; background:var(--white); }
+  .diagram-card-item .caption{ font-size:12px; color:var(--ink-soft); margin-top:8px; font-weight:500; }
+
+  .custom-table{ width:100%; border-collapse:collapse; margin:12px 0; font-size:13px; }
+  .custom-table th, .custom-table td{ border:1px solid var(--line); padding:6px 10px; text-align:left; }
+  .custom-table th{ background:var(--paper-deep); font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--teal-deep); }
+
+  .diag-card{ background:var(--white); border:1.5px solid var(--line); border-radius:6px; padding:16px; margin-top:12px; transition:border-color 0.2s ease; }
+  .diag-card.active-selected{ border-color:var(--teal); background:#FAFDFB; }
+  .diag-header{ display:flex; gap:12px; align-items:flex-start; }
+  .diag-header input[type="checkbox"]{ margin-top:4px; width:18px; height:18px; accent-color:var(--teal); cursor:pointer; }
+  .diag-title{ font-weight:600; font-size:14px; color:var(--ink); flex:1; }
+  
+  .diag-controls{
+    display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line);
+    grid-template-columns:1fr 1fr 110px; gap:12px; align-items:center;
+  }
+  .diag-card.active-selected .diag-controls{ display:grid; }
+  @media (max-width:768px){ .diag-card.active-selected .diag-controls{ grid-template-columns:1fr; } }
+
+  .diag-select{
+    width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:4px;
+    font-family:'IBM Plex Sans',sans-serif; font-size:12.5px; background:var(--white);
+  }
+  .feedback-badge{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px;
+    padding:6px 10px; border-radius:4px; text-align:center; display:none;
+  }
+  .feedback-badge.correct{ display:block; background:#DCFCE7; color:var(--correct); border:1px solid #86EFAC; }
+  .feedback-badge.incorrect{ display:block; background:#FEE2E2; color:var(--incorrect); border:1px solid #FCA5A5; }
+
+  .mod-intro-box{
+    background:var(--paper-deep); border-left:4px solid var(--amber); border-radius:0 6px 6px 0;
+    padding:18px; margin:0 0 24px; font-size:13.5px;
+  }
+  .mod-intro-box h3{ color:var(--teal-deep); font-size:16px; margin-bottom:6px; }
+
+  .path-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px; }
+  @media (max-width:900px){ .path-grid{ grid-template-columns:1fr; } }
+  
+  .path-card{
+    background:var(--white); border:1.5px solid var(--line); border-radius:6px;
+    padding:16px; text-align:left; cursor:pointer; font-family:inherit;
+    transition:border-color .15s ease, background .15s ease;
+    display:flex; flex-direction:column; gap:6px; color:var(--ink);
+  }
+  .path-card:hover{ border-color:var(--teal); }
+  .path-card.active{ border-color:var(--rust); background:var(--rust-soft); }
+  .path-card .tag{ font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; color:var(--rust); font-weight:600; }
+  .path-card .name{ font-weight:600; font-size:16px; }
+  .path-card .desc{ font-size:13px; color:var(--ink-soft); }
+
+  .refinement-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+  @media (max-width:700px){ .refinement-grid{ grid-template-columns:1fr; } }
+  
+  .refine-card{
+    background:var(--white); border:1.5px solid var(--line); border-radius:6px;
+    padding:14px; display:flex; gap:12px; align-items:flex-start; cursor:pointer;
+  }
+  .refine-card.mandatory{ border-color:var(--sage); background:var(--sage-soft); cursor:not-allowed; }
+  .refine-card input{ margin-top:3px; accent-color:var(--rust); width:18px; height:18px; cursor:pointer; }
+
+  .validation-msg{ margin-top:12px; font-weight:600; font-size:13.5px; padding:8px 12px; border-radius:4px; display:none; }
+  .validation-msg.warn{ display:block; background:var(--amber-soft); color:var(--amber); border:1px solid #E2C082; }
+  .validation-msg.ok{ display:block; background:#DCFCE7; color:var(--correct); border:1px solid #86EFAC; }
+
+  .drag-section{ margin-top:24px; background:var(--teal-deep); color:var(--white); border-radius:6px; padding:20px; display:none; }
+  .drag-section.show{ display:block; }
+
+  .drag-pool{
+    background:rgba(255,255,255,0.08); border:1px dashed #A0B2A6; border-radius:6px;
+    padding:14px; margin:14px 0; min-height:80px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  }
+  .drag-card-item{
+    background:var(--white); color:var(--ink); padding:8px 12px; border-radius:4px;
+    font-size:12px; font-weight:500; cursor:grab; border:1px solid var(--line);
+    box-shadow:0 2px 4px rgba(0,0,0,0.15); max-width:340px; user-select:none;
+  }
+  .drag-card-item:active{ cursor:grabbing; opacity:0.6; }
+
+  .match-table{ width:100%; border-collapse:collapse; font-size:12.5px; color:var(--ink); background:var(--white); border-radius:4px; overflow:hidden; margin-top:12px; }
+  .match-table th, .match-table td{ padding:10px; border:1px solid var(--line); text-align:left; vertical-align:top; }
+  .match-table th{ background:var(--paper-deep); font-family:'Space Grotesk',sans-serif; color:var(--teal-deep); font-weight:600; }
+  
+  .drop-zone{
+    min-height:60px; background:var(--paper); border:2px dashed var(--line); border-radius:4px;
+    padding:6px; transition:all 0.2s ease; display:flex; flex-direction:column; gap:6px;
+  }
+  .drop-zone.drag-over{ background:var(--sage-soft); border-color:var(--sage); }
+  .drop-zone.has-item{ border-style:solid; border-color:var(--teal); background:var(--white); }
+
+  .badge-type{ display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; padding:2px 5px; border-radius:3px; font-weight:600; margin-bottom:4px; }
+  .badge-refine{ background:#DBEAFE; color:#1E40AF; }
+  .badge-extend{ background:#E0E7FF; color:#3730A3; }
+  .badge-redirect{ background:#FCE7F3; color:#9D174D; }
+
+  .check-btn{
+    background:var(--rust); color:var(--white); border:none; padding:10px 20px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+    border-radius:4px; cursor:pointer; margin-top:16px; transition:background 0.15s ease;
+  }
+  .check-btn:hover{ background:#A33E20; }
+
+  .row-status{ font-weight:700; font-size:16px; margin-top:4px; }
+  .row-status.correct{ color:var(--correct); }
+  .row-status.incorrect{ color:var(--incorrect); }
+
+  footer{ border-top:1px solid var(--line); padding:20px 0 40px; font-size:12.5px; color:var(--ink-soft); margin-top:30px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eq-badge">CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + CO₂(g) + H₂O(l)</div>
+    <h1 class="title"><span class="accent">Rate of Reaction:</span> Practical Evaluation & Modification</h1>
+    <p class="subtitle">Interactive Chemistry Practical Analysis Suite</p>
+
+    <!-- TAB BUTTONS -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="openTab(event, 'tab1')">1. Original Experiment</button>
+      <button class="tab-btn" onclick="openTab(event, 'tab2')">2. Analyse Data</button>
+      <button class="tab-btn" onclick="openTab(event, 'tab3')">3. Uncertainty & Limitations</button>
+      <button class="tab-btn" onclick="openTab(event, 'tab4')">4. Modifications</button>
+    </div>
+  </header>
+
+  <!-- ================= TAB 1: ORIGINAL EXPERIMENT ================= -->
+  <div id="tab1" class="tab-content active">
+    <div class="doc-card">
+      <h2>Mandatory Practical: Surface Area and Reaction Rate</h2>
+      
+      <div class="doc-grid" style="margin-top:16px;">
+        <div>
+          <h3>Aim</h3>
+          <p style="font-size:14px; margin-top:4px;">
+            Conduct an experiment to test the effect of increasing surface area on the rate of a reaction between calcium carbonate (CaCO₃) and hydrochloric acid (HCl).
+          </p>
+
+          <h3 style="margin-top:16px;">Materials & Apparatus</h3>
+          <ul class="spec-list">
+            <li><strong>Setup Apparatus:</strong> Stand and clamp, water trough, 100 mL measuring cylinder, 100 mL conical flask with stopper and plastic tubing.</li>
+            <li><strong>Reactants:</strong> 0.5 g calcium carbonate powder, 0.5 g calcium carbonate chips, 25 mL of 0.5 M hydrochloric acid (HCl).</li>
+            <li><strong>Timing & Measurement:</strong> Stopwatch and volumetric gas measuring setup.</li>
+          </ul>
+
+          <h3>Experimental Variables</h3>
+          <table class="custom-table" style="margin-top:8px;">
+            <thead>
+              <tr>
+                <th>Variable Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Independent Variable</strong></td>
+                <td>Surface area of calcium carbonate (CaCO₃) — Powder vs. Chips (Rocks).</td>
+              </tr>
+              <tr>
+                <td><strong>Dependent Variable</strong></td>
+                <td>Volume of CO₂ gas produced (mL) recorded every 30 seconds.</td>
+              </tr>
+              <tr>
+                <td><strong>Controlled Variables</strong></td>
+                <td>Mass of CaCO₃ (0.5 g), volume of acid (25 mL), acid concentration (0.5 M), temperature, and atmospheric pressure.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <div class="diagram-box">
+            <!-- REPLACE SRC ATTRIBUTE BELOW WITH YOUR LOCAL FILE OR URL (e.g. setup_diagram.png) -->
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSU68A40AAAADklEQVR42mNk+M9AFAACEAAnY30B1QAAAABJRU5ErkJggg==" id="diagramImg" alt="Experimental Setup Diagram">
+            <div class="diagram-caption">Diagram 1: Experimental Setup (Gas Displacement Method)</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:20px;">Methodology</h3>
+      <ol class="spec-list" style="margin-left:20px;">
+        <li>Set up the conical flask, stopper, tubing, water trough, measuring cylinder, clamp, and stand according to Diagram 1.</li>
+        <li>Weigh out 0.5 g of calcium carbonate powder and place it into the conical flask.</li>
+        <li>Measure out 25 mL of 0.5 M hydrochloric acid and set it aside.</li>
+        <li>Prepare a stopwatch and assign a designated reader to observe the measuring cylinder volume every 30 seconds.</li>
+        <li>Pour the prepared acid into the conical flask and immediately seal it securely with the rubber stopper.</li>
+        <li>Record the volume of CO₂ gas produced at 30-second intervals.</li>
+        <li>Stop recording when the gas volume remains unchanged for more than 2 minutes, or when 5 minutes (300 s) have elapsed.</li>
+        <li>Empty, rinse, and clean the conical flask.</li>
+        <li>Repeat the procedure using 0.5 g of calcium carbonate chips (rocks).</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ================= TAB 2: ANALYSE DATA ================= -->
+  <div id="tab2" class="tab-content">
+    <div class="data-section">
+      <h2>Original Experiment Data & Reaction Rate Analysis</h2>
+      <p style="font-size:13.5px; color:var(--ink-soft); margin-top:4px;">
+        Input or edit recorded volumes from your practical observation. The chart, vertical calculation line, and mathematical working out update automatically.
+      </p>
+
+      <div class="data-grid">
+        <div>
+          <div class="table-container">
+            <table class="data-table" id="origDataTable">
+              <thead>
+                <tr>
+                  <th>Time (s)</th>
+                  <th>Rocks (mL)</th>
+                  <th>Powder (mL)</th>
+                </tr>
+              </thead>
+              <tbody id="dataTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="graph-container">
+          <canvas id="origGraph"></canvas>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="slider-control">
+          <label for="timeSlider"><strong>Select Calculation Time Interval (t):</strong></label>
+          <input type="range" id="timeSlider" min="30" max="450" step="30" value="60" oninput="onSliderChange(this.value)">
+          <div class="slider-val-badge" id="sliderValDisplay">t = 60 s</div>
+        </div>
+
+        <div class="calc-results">
+          <div class="rate-badge">
+            <div class="lbl">Rocks Average Rate (0–<span class="t-val">60</span>s)</div>
+            <div class="val" id="rateRocksVal">0.00 mL/s</div>
+            <div class="working-box" id="workingRocks">
+              <div class="formula">Formula: rate of reaction = volume of gas produced / time elapsed</div>
+              <div>Rate = <span class="v-vol">0.0</span> mL / <span class="t-val">60</span> s</div>
+              <div><strong>Rate = <span class="v-rate">0.00</span> mL/s</strong></div>
+            </div>
+          </div>
+
+          <div class="rate-badge" style="border-color:var(--rust);">
+            <div class="lbl" style="color:var(--rust);">Powder Average Rate (0–<span class="t-val">60</span>s)</div>
+            <div class="val" style="color:var(--rust);" id="ratePowderVal">0.00 mL/s</div>
+            <div class="working-box" id="workingPowder" style="border-color:var(--rust-soft);">
+              <div class="formula" style="color:var(--rust);">Formula: rate of reaction = volume of gas produced / time elapsed</div>
+              <div>Rate = <span class="v-vol">0.0</span> mL / <span class="t-val">60</span> s</div>
+              <div><strong>Rate = <span class="v-rate">0.00</span> mL/s</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 3: UNCERTAINTY & LIMITATIONS ================= -->
+  <div id="tab3" class="tab-content">
+
+    <div class="bg-summary-box">
+      <h2>Background</h2>
+      <p style="font-size:13.5px; color:var(--ink-soft); margin-top:4px;">
+        Review these core evaluation concepts before analyzing your experimental data.
+      </p>
+
+      <div class="concept-card">
+        <h4>Limitations vs. Uncertainty</h4>
+        <p style="font-size:13px; margin:0;">
+          <strong>Limitations</strong> are flaws or constraints in the experimental design or methodology itself (e.g., small sample size, single trial, uncontrolled variables).<br>
+          <strong>Uncertainty</strong> is the quantifiable doubt in a measured numerical value based on instrument resolution (e.g., ±0.05 g or ±0.5 mL).
+        </p>
+      </div>
+
+      <!-- DIAGRAMS FOR ACCURACY, PRECISION, RELIABILITY & VALIDITY -->
+      <div class="diagram-flex-grid">
+        <div class="diagram-card-item">
+          <img src="https://images.squarespace-cdn.com/content/v1/5521ae43e4b09e51c8646b5a/1592317185292-0X8P0X90O91K6N988O99/sketchplanations-accuracy-and-precision.png" alt="Accuracy and Precision Diagram">
+          <div class="caption">Figure 1: Accuracy vs Precision Concept Matrix</div>
+        </div>
+        <div class="diagram-card-item">
+          <img src="https://images.squarespace-cdn.com/content/v1/5521ae43e4b09e51c8646b5a/1592317185244-K4O0O5N7P5K5K5O9P5O9/sketchplanations-understanding-reliability-and-validity.jpg" alt="Reliability and Validity Diagram">
+          <div class="caption">Figure 2: Reliability vs Validity Target Models</div>
+        </div>
+      </div>
+
+      <div class="concept-card">
+        <h4>Accuracy & Precision vs. Reliability & Validity</h4>
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Concept Pair</th>
+              <th>Concerned With</th>
+              <th>Undermined By</th>
+              <th>Key Experimental Fix</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Accuracy</strong></td>
+              <td>Closeness to true value</td>
+              <td>Systematic errors & design flaws</td>
+              <td>Recalibrate equipment / Fix method</td>
+            </tr>
+            <tr>
+              <td><strong>Precision</strong></td>
+              <td>Closeness of repeated measurements</td>
+              <td>Random error & instrument uncertainty</td>
+              <td>Increase trials & finer resolution scale</td>
+            </tr>
+            <tr>
+              <td><strong>Reliability</strong></td>
+              <td>Reproducibility & consistency</td>
+              <td>Random error & single trials (prevents % uncertainty of mean)</td>
+              <td>Repeat trials and average data</td>
+            </tr>
+            <tr>
+              <td><strong>Validity</strong></td>
+              <td>Whether experiment tests intended hypothesis</td>
+              <td>Uncontrolled variables & flawed design</td>
+              <td>Control extraneous variables strictly</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DIAGNOSTIC SELECTION -->
+    <div class="doc-card">
+      <h2>Identify & Classify Observed Experimental Weaknesses</h2>
+      <p style="font-size:13.5px; color:var(--ink-soft); margin-top:4px;">
+        Select the observed issues from your trial. Classify whether each is a <strong>Limitation</strong> or <strong>Uncertainty</strong>, and choose the correct integrated justification describing its effect on Validity or Reliability.
+      </p>
+
+      <div id="diagnosticContainer"></div>
+    </div>
+
+  </div>
+
+  <!-- ================= TAB 4: MODIFICATIONS ================= -->
+  <div id="tab4" class="tab-content">
+
+    <!-- DETAILED MODIFICATION BACKGROUND -->
+    <div class="mod-intro-box">
+      <h3>Background</h3>
+      <p style="margin:4px 0 10px;">
+        When evaluating experimental methodologies, modifications are designed to systematically address identified limitations, minimize measurement uncertainties, or expand scientific scope. Modifications are categorized into three distinct operational pathways:
+      </p>
+      <table class="custom-table" style="background:var(--white); margin:0 0 12px 0;">
+        <thead>
+          <tr>
+            <th>Modification</th>
+            <th>Primary Objective</th>
+            <th>Impact on Quality</th>
+            <th>What Changes vs. Preserved</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Refinement</strong></td>
+            <td>Fix procedural flaws & lower measurement uncertainties</td>
+            <td>Increases Precision, Accuracy, & Reliability</td>
+            <td><strong>Changes:</strong> Equipment resolution, trial count, timing frequency.<br><strong>Preserves:</strong> Research question & variables.</td>
+          </tr>
+          <tr>
+            <td><strong>Redirection</strong></td>
+            <td>Shift focus to a different kinetic factor when current setup fails or yields unexpected trends</td>
+            <td>Restructures Experimental Scope & Validity</td>
+            <td><strong>Changes:</strong> Independent variable (e.g., Temp or Molarity).<br><strong>Preserves:</strong> General reaction system.</td>
+          </tr>
+          <tr>
+            <td><strong>Extension</strong></td>
+            <td>Expand range or granularity of the independent variable to establish mathematical relationships</td>
+            <td>Enhances Validity & Data Range Resolution</td>
+            <td><strong>Changes:</strong> Number of test levels (e.g., 2 levels → 5 levels).<br><strong>Preserves:</strong> Core methodology & reaction type.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:12.5px; color:var(--ink-soft); margin:0;">
+        <em>Note on Scientific Rigor:</em> A well-justified modification plan must combine <strong>at least one structural path change</strong> (Redirection or Extension) with <strong>multiple targeted Refinements</strong> to guarantee that collected data is both highly valid and statistically reliable.
+      </p>
+    </div>
+
+    <!-- SELECT MODIFICATIONS -->
+    <div class="doc-card">
+      <h2>Select Your Planned Modifications</h2>
+
+      <h3 class="selection-heading" style="margin-top:10px;">A. Pick ONE Main Independent Variable Modification (Redirection or Extension):</h3>
+      <div class="path-grid" id="directionalGrid">
+        <div class="path-card" data-dir="temp">
+          <span class="tag">Redirection</span>
+          <span class="name">Effect of Temperature</span>
+          <span class="desc">Redirect independent variable to acid temperature across 5 controlled levels (5°C, 15°C, 25°C, 35°C, 45°C) using hot water baths and ice baths to achieve required temperatures.</span>
+        </div>
+        <div class="path-card" data-dir="conc">
+          <span class="tag">Redirection</span>
+          <span class="name">Effect of Concentration</span>
+          <span class="desc">Redirect independent variable to acid molarity across a broader range of 5 concentrations (0.1 M, 0.5 M, 1.0 M, 1.5 M, 2.0 M HCl).</span>
+        </div>
+        <div class="path-card" data-dir="sa">
+          <span class="tag">Extension</span>
+          <span class="name">Surface Area (5 Variations)</span>
+          <span class="desc">Extend surface area beyond 2 levels into 5 standardized particle sizes.
+            <table class="custom-table" style="font-size:11.5px; margin-top:8px;">
+              <thead>
+                <tr><th>Sample</th><th>Description</th><th>Relative Surface Area</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td>Very fine powder</td><td>Very high</td></tr>
+                <tr><td>2</td><td>Fine granules</td><td>High</td></tr>
+                <tr><td>3</td><td>Small chunks</td><td>Moderate</td></tr>
+                <tr><td>4</td><td>Medium-sized chunks</td><td>Low</td></tr>
+                <tr><td>5</td><td>Large chunks</td><td>Very low</td></tr>
+              </tbody>
+            </table>
+          </span>
+        </div>
+      </div>
+
+      <h3 class="selection-heading" style="margin-top:24px;">B. Pick 2 to 3 Methodological Refinements (One MUST be 3 Trials):</h3>
+      <div class="refinement-grid">
+        <label class="refine-card mandatory">
+          <input type="checkbox" id="modRepeats" class="mod-refine-check" checked disabled onchange="validateRefinementCount()">
+          <div>
+            <strong>Refinement: Repeat Practical 3 Times [MANDATORY]</strong>
+            <div style="font-size:12.5px; color:var(--ink-soft); margin-top:2px;">Repeat 3 complete times per condition to calculate mean values and percentage uncertainty of the mean.</div>
+          </div>
+        </label>
+
+        <label class="refine-card">
+          <input type="checkbox" id="modMassLoss" class="mod-refine-check" onchange="validateRefinementCount()">
+          <div>
+            <strong>Refinement: Mass Loss Method</strong>
+            <div style="font-size:12.5px; color:var(--ink-soft); margin-top:2px;">Switch from gas displacement to measuring mass loss on digital balance (fixes gas leakage & tube errors).</div>
+          </div>
+        </label>
+
+        <label class="refine-card">
+          <input type="checkbox" id="modTimeFreq" class="mod-refine-check" onchange="validateRefinementCount()">
+          <div>
+            <strong>Refinement: High-Frequency Timing</strong>
+            <div style="font-size:12.5px; color:var(--ink-soft); margin-top:2px;">Record time every 5–10 seconds to capture rapid initial reaction kinetics accurately instead of 30-second gaps.</div>
+          </div>
+        </label>
+
+        <label class="refine-card">
+          <input type="checkbox" id="modChipsOrder" class="mod-refine-check" onchange="validateRefinementCount()">
+          <div>
+            <strong>Refinement: Precise CaCO₃ Weighing Method</strong>
+            <div style="font-size:12.5px; color:var(--ink-soft); margin-top:2px;">Weigh large chips first, then add fine pieces to hit 0.50 g exactly without overshooting scale resolution.</div>
+          </div>
+        </label>
+
+        <label class="refine-card">
+          <input type="checkbox" id="modPipette" class="mod-refine-check" onchange="validateRefinementCount()">
+          <div>
+            <strong>Refinement: Volumetric Pipette for Acid</strong>
+            <div style="font-size:12.5px; color:var(--ink-soft); margin-top:2px;">Measure volume of acid with volumetric pipette (±0.03 mL) instead of measuring cylinder.</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="validation-msg" id="refineWarn">Select 2 to 3 refinements (including mandatory 3 trials).</div>
+
+      <!-- DRAG AND DROP MATCHING TABLE SECTION -->
+      <div class="drag-section" id="dragSection">
+        <h3 style="color:#FFF; font-size:16px;">Limitation & Modification Matching Table</h3>
+        <p style="font-size:13px; color:#D8E4DD; margin-top:4px;">
+          Drag each prepopulated **Limitation / Uncertainty** card from the pool into the **FIRST column** to match its corresponding **Modification** row.
+        </p>
+
+        <!-- Prepopulated Drag Pool -->
+        <div class="drag-pool" id="dragPool" ondragover="allowDrop(event)" ondrop="dropToPool(event)"></div>
+
+        <div style="overflow-x:auto;">
+          <table class="match-table">
+            <thead>
+              <tr>
+                <th style="width:55%;">Limitation / Uncertainty & Effect on Validity/Reliability (Drag Card Here)</th>
+                <th style="width:35%;">Modification & Justification</th>
+                <th style="width:10%; text-align:center;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="matchTableBody"></tbody>
+          </table>
+        </div>
+
+        <button class="check-btn" onclick="checkMatching()">Check Matching Accuracy</button>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    Rate of Reaction Practical Suite — Chemistry Practical Modification Tool.
+  </footer>
+</div>
+
+<script>
+(function(){
+
+  /* ---------------- DATA: DIAGNOSTIC ITEMS WITH MATCHING KEYS ---------------- */
+  var DIAGNOSTIC_ITEMS = [
+    {
+      id: "item0",
+      text: "Only a single trial was conducted per condition, preventing calculation of standard deviation or checking repeatability.",
+      correctCategory: "Limitation",
+      correctOptionIdx: 1,
+      options: [
+        "Undermines Validity: Single trial introduces systematic bias into chemical molarity.",
+        "Undermines Reliability: Prevents calculating mean values and % uncertainty of the mean to verify method reliability.",
+        "Undermines Accuracy: Causes the scale reading to drift continuously.",
+        "Undermines Precision: Alters the particle surface area dynamically during reaction."
+      ],
+      matchedModKey: "modRepeats"
+    },
+    {
+      id: "item6",
+      text: "Recording gas volume only every 30 seconds limits reaction rate determination to coarse 30s intervals, missing initial kinetics.",
+      correctCategory: "Limitation",
+      correctOptionIdx: 0,
+      options: [
+        "Undermines Reliability: Fastest rate occurs early on; 30s gaps smooth out the curve and obscure true initial kinetics.",
+        "Undermines Validity: Alters the activation energy of the acid.",
+        "Undermines Accuracy: Creates systematic balance calibration errors.",
+        "Undermines Validity: Changes the stoichiometry of calcium carbonate."
+      ],
+      matchedModKey: "modTimeFreq"
+    },
+    {
+      id: "item4",
+      text: "Apparatus flaws (e.g. trapped initial air, water back-pressure, delivery tube friction, and initial gas escape before stopper insertion).",
+      correctCategory: "Limitation",
+      correctOptionIdx: 3,
+      options: [
+        "Undermines Reliability: Causes random fluctuations in stopwatch reading.",
+        "Undermines Precision: Decreases scale resolution of measuring cylinder.",
+        "Undermines Reliability: Prevents calculating percentage uncertainty of the mean.",
+        "Undermines Accuracy & Validity: Physical leaks and tube resistance artificially reduce recorded volume below stoichiometric values."
+      ],
+      matchedModKey: "modMassLoss"
+    },
+    {
+      id: "item2",
+      text: "The mass of CaCO₃ measured out was not precisely 0.50 g due to balance resolution and chip size variance.",
+      correctCategory: "Uncertainty",
+      correctOptionIdx: 1,
+      options: [
+        "Undermines Validity: Changes the concentration of hydrochloric acid.",
+        "Undermines Reliability: Variances in reactant mass alter molar ratios, increasing data variance across repeat runs.",
+        "Undermines Accuracy: Introduces gas leakage in the delivery tube.",
+        "Undermines Validity: Causes ambient temperature fluctuations."
+      ],
+      matchedModKey: "modChipsOrder"
+    },
+    {
+      id: "item5",
+      text: "Volumetric uncertainty when using a standard measuring cylinder for acid (±0.5 mL).",
+      correctCategory: "Uncertainty",
+      correctOptionIdx: 0,
+      options: [
+        "Undermines Reliability: Coarse graduations introduce random reading error, causing minor concentration variance across runs.",
+        "Undermines Validity: Changes the identity of the chemical reactants.",
+        "Undermines Accuracy: Systematically underestimates total gas volume.",
+        "Undermines Validity: Shifts room pressure during timing."
+      ],
+      matchedModKey: "modPipette"
+    },
+    {
+      id: "item_temp",
+      text: "Temperature of acid was not varied or systematically controlled across different kinetic thermal states.",
+      correctCategory: "Limitation",
+      correctOptionIdx: 0,
+      options: [
+        "Undermines Validity & Scope: Prevents determining activation energy and thermal dependency of collision rate."
+      ],
+      matchedModKey: "temp"
+    },
+    {
+      id: "item_conc",
+      text: "Acid concentration was kept static at 0.5 M, preventing evaluation of reaction order across varying molar concentrations.",
+      correctCategory: "Limitation",
+      correctOptionIdx: 0,
+      options: [
+        "Undermines Validity & Scope: Restricts kinetic analysis to a single molarity level."
+      ],
+      matchedModKey: "conc"
+    },
+    {
+      id: "item_sa",
+      text: "Only 2 surface area conditions (powder vs chips) were tested, limiting trend identification across a broader range.",
+      correctCategory: "Limitation",
+      correctOptionIdx: 0,
+      options: [
+        "Undermines Validity: Two data points only produce a linear connection, failing to confirm non-linear kinetic trends."
+      ],
+      matchedModKey: "sa"
+    }
+  ];
+
+  /* ---------------- DATA: PATHS & REFINEMENTS ---------------- */
+  var PATHS = {
+    temp: {
+      type: "Redirection",
+      name: "Effect of Temperature",
+      range: "5 variations: 5°C, 15°C, 25°C, 35°C, 45°C",
+      justification: "Improves Validity by testing temperature dependence using hot water baths and ice baths to adjust and maintain target acid temperatures accurately."
+    },
+    conc: {
+      type: "Redirection",
+      name: "Effect of Concentration",
+      range: "5 variations: 0.1 M, 0.5 M, 1.0 M, 1.5 M, 2.0 M HCl",
+      justification: "Improves Validity and Scope by evaluating reaction rate across a broader concentration spectrum to determine kinetic reaction order."
+    },
+    sa: {
+      type: "Extension",
+      name: "Surface Area (5 Variations)",
+      range: "5 particle sizes: Powder, Fine Granules, Small Chunks, Medium Chunks, Large Chunks",
+      justification: "Improves Scope & Validity by establishing a multi-point quantitative trend between surface area and rate across 5 distinct levels."
+    }
+  };
+
+  var REFINEMENT_MAP = {
+    modRepeats: {
+      id: "modRepeats",
+      name: "Refinement: Repeat Experiment 3 Times",
+      type: "Refinement",
+      justification: "Improves Reliability: Allows calculation of mean values and percentage uncertainty of the mean."
+    },
+    modMassLoss: {
+      id: "modMassLoss",
+      name: "Refinement: Switch to Mass Loss Method",
+      type: "Refinement",
+      justification: "Improves Accuracy & Validity: Open beaker on balance eliminates initial gas leakage, neck reading errors, and tube resistance."
+    },
+    modTimeFreq: {
+      id: "modTimeFreq",
+      name: "Refinement: High-Frequency Timing (5–10s Intervals)",
+      type: "Refinement",
+      justification: "Improves Reliability & Precision: Captures rapid initial reaction kinetics accurately instead of averaging over 30-second gaps."
+    },
+    modChipsOrder: {
+      id: "modChipsOrder",
+      name: "Refinement: Precise CaCO₃ Weighing Method",
+      type: "Refinement",
+      justification: "Improves Precision & Validity: Ensures strict consistency of limiting reactant mass and particle size selection."
+    },
+    modPipette: {
+      id: "modPipette",
+      name: "Refinement: Volumetric Pipette for Acid",
+      type: "Refinement",
+      justification: "Improves Precision & Reliability: Reduces volumetric measurement uncertainty from ±0.5 mL to ±0.03 mL."
+    }
+  };
+
+  /* ---------------- TAB ROUTING ---------------- */
+  window.openTab = function(evt, tabId){
+    var contents = document.querySelectorAll('.tab-content');
+    contents.forEach(function(c){ c.classList.remove('active'); });
+
+    var btns = document.querySelectorAll('.tab-btn');
+    btns.forEach(function(b){ b.classList.remove('active'); });
+
+    document.getElementById(tabId).classList.add('active');
+    evt.currentTarget.classList.add('active');
+
+    if(tabId === 'tab2'){
+      setTimeout(renderGraph, 50);
+    }
+  };
+
+  /* ---------------- TAB 2 GRAPH & RATES ---------------- */
+  var fixedTimes = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360, 390, 420, 450];
+  var initialOriginalData = [
+    { time: 0, rocks: 0, powder: 0 },
+    { time: 30, rocks: 0, powder: 55 },
+    { time: 60, rocks: 0, powder: 60 },
+    { time: 90, rocks: 0, powder: 60 },
+    { time: 120, rocks: 0, powder: 60 },
+    { time: 150, rocks: 5, powder: 62 },
+    { time: 180, rocks: 10, powder: 62 },
+    { time: 210, rocks: 20, powder: 62 },
+    { time: 240, rocks: 25, powder: 62 },
+    { time: 270, rocks: 30, powder: 62 },
+    { time: 300, rocks: 37, powder: 62 },
+    { time: 330, rocks: 42, powder: 62 },
+    { time: 360, rocks: 47, powder: 62 },
+    { time: 390, rocks: 50, powder: 62 },
+    { time: 420, rocks: 54, powder: 62 },
+    { time: 450, rocks: 59, powder: 62 }
+  ];
+
+  var myChart = null;
+
+  function initOriginalTable(){
+    var tbody = document.getElementById('dataTableBody');
+    tbody.innerHTML = '';
+    initialOriginalData.forEach(function(row){
+      var tr = document.createElement('tr');
+      tr.innerHTML = 
+        '<td class="time-cell">' + row.time + '</td>' +
+        '<td><input type="number" value="' + row.rocks + '" onchange="updateDataFromTable()" class="r-cell"></td>' +
+        '<td><input type="number" value="' + row.powder + '" onchange="updateDataFromTable()" class="p-cell"></td>';
+      tbody.appendChild(tr);
+    });
+    renderGraph();
+    calculateRates();
+  }
+
+  function getTableData(){
+    var rows = document.querySelectorAll('#dataTableBody tr');
+    var data = [];
+    rows.forEach(function(r, idx){
+      var t = fixedTimes[idx];
+      var rock = parseFloat(r.querySelector('.r-cell').value) || 0;
+      var pow = parseFloat(r.querySelector('.p-cell').value) || 0;
+      data.push({ time: t, rocks: rock, powder: pow });
+    });
+    return data;
+  }
+
+  window.updateDataFromTable = function(){
+    renderGraph();
+    calculateRates();
+  };
+
+  function renderGraph(){
+    var data = getTableData();
+    var times = data.map(function(d){ return d.time; });
+    var rockVals = data.map(function(d){ return d.rocks; });
+    var powVals = data.map(function(d){ return d.powder; });
+    var currentSliderT = parseFloat(document.getElementById('timeSlider').value) || 60;
+
+    var ctx = document.getElementById('origGraph').getContext('2d');
+    if(myChart){ myChart.destroy(); }
+
+    myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: times,
+        datasets: [
+          {
+            label: 'Powder (Fine Particle Size)',
+            data: powVals,
+            borderColor: '#C1502E',
+            backgroundColor: 'rgba(193, 80, 46, 0.08)',
+            borderWidth: 2.5,
+            tension: 0.2,
+            fill: true
+          },
+          {
+            label: 'Rocks (Large Particle Size)',
+            data: rockVals,
+            borderColor: '#164C43',
+            backgroundColor: 'rgba(22, 76, 67, 0.08)',
+            borderWidth: 2.5,
+            tension: 0.2,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: { display: true, text: 'CO₂ Volume Produced over Time', font: { family: 'Space Grotesk', size: 14 } },
+          annotation: {
+            annotations: {
+              sliderLine: {
+                type: 'line',
+                xMin: currentSliderT,
+                xMax: currentSliderT,
+                borderColor: '#B8842E',
+                borderWidth: 2,
+                borderDash: [6, 4],
+                label: {
+                  display: true,
+                  content: 't = ' + currentSliderT + 's',
+                  position: 'start',
+                  backgroundColor: '#B8842E',
+                  color: '#FFF',
+                  font: { family: 'IBM Plex Mono', size: 11, weight: 'bold' },
+                  padding: 4
+                }
+              }
+            }
+          }
+        },
+        scales: {
+          x: { type: 'linear', min: 0, max: 450, ticks: { stepSize: 30 } },
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  window.onSliderChange = function(val){
+    document.getElementById('sliderValDisplay').innerText = 't = ' + val + ' s';
+    if(myChart && myChart.options.plugins.annotation){
+      myChart.options.plugins.annotation.annotations.sliderLine.xMin = parseFloat(val);
+      myChart.options.plugins.annotation.annotations.sliderLine.xMax = parseFloat(val);
+      myChart.options.plugins.annotation.annotations.sliderLine.label.content = 't = ' + val + 's';
+      myChart.update();
+    }
+    calculateRates();
+  };
+
+  window.calculateRates = function(){
+    var targetT = parseFloat(document.getElementById('timeSlider').value) || 60;
+    var data = getTableData();
+    document.querySelectorAll('.t-val').forEach(function(el){ el.innerText = targetT; });
+
+    function getVolumeAt(t, key){
+      if(t <= 0) return 0;
+      if(t <= data[0].time) return data[0][key];
+      if(t >= data[data.length-1].time) return data[data.length-1][key];
+      for(var i=0; i<data.length-1; i++){
+        if(t >= data[i].time && t <= data[i+1].time){
+          var t1 = data[i].time, t2 = data[i+1].time;
+          var v1 = data[i][key], v2 = data[i+1][key];
+          return v1 + ((t - t1) / (t2 - t1)) * (v2 - v1);
+        }
+      }
+      return 0;
+    }
+
+    var volRocks = getVolumeAt(targetT, 'rocks');
+    var volPowder = getVolumeAt(targetT, 'powder');
+    var rateRocks = (volRocks / targetT).toFixed(2);
+    var ratePowder = (volPowder / targetT).toFixed(2);
+
+    document.getElementById('rateRocksVal').innerText = rateRocks + ' mL/s';
+    var wRocks = document.getElementById('workingRocks');
+    wRocks.querySelector('.v-vol').innerText = volRocks.toFixed(1);
+    wRocks.querySelector('.v-rate').innerText = rateRocks;
+
+    document.getElementById('ratePowderVal').innerText = ratePowder + ' mL/s';
+    var wPowder = document.getElementById('workingPowder');
+    wPowder.querySelector('.v-vol').innerText = volPowder.toFixed(1);
+    wPowder.querySelector('.v-rate').innerText = ratePowder;
+  };
+
+  /* ---------------- TAB 3 DIAGNOSTICS & SELECTIONS ---------------- */
+
+  function renderDiagnosticCards(){
+    var container = document.getElementById('diagnosticContainer');
+    container.innerHTML = '';
+
+    // Filter out direction items from Tab 3 interactive classification
+    var tab3Items = DIAGNOSTIC_ITEMS.filter(function(x){ return !x.id.startsWith('item_'); });
+
+    tab3Items.forEach(function(item){
+      var card = document.createElement('div');
+      card.className = 'diag-card';
+      card.id = 'card_' + item.id;
+
+      var optionsHTML = '<option value="">-- Select Effect & Justification --</option>';
+      item.options.forEach(function(opt, idx){
+        optionsHTML += '<option value="' + idx + '">' + opt + '</option>';
+      });
+
+      card.innerHTML = 
+        '<div class="diag-header">' +
+          '<input type="checkbox" id="chk_' + item.id + '" onchange="toggleDiagCard(\'' + item.id + '\')">' +
+          '<div class="diag-title">' + item.text + '</div>' +
+        '</div>' +
+        '<div class="diag-controls">' +
+          '<div>' +
+            '<select class="diag-select" id="cat_' + item.id + '" onchange="validateDiagnostic(\'' + item.id + '\')">' +
+              '<option value="">-- Classify --</option>' +
+              '<option value="Limitation">Limitation (Method/Design)</option>' +
+              '<option value="Uncertainty">Uncertainty (Measurement)</option>' +
+            '</select>' +
+          '</div>' +
+          '<div>' +
+            '<select class="diag-select" id="imp_' + item.id + '" onchange="validateDiagnostic(\'' + item.id + '\')">' +
+              optionsHTML +
+            '</select>' +
+          '</div>' +
+          '<div class="feedback-badge" id="fb_' + item.id + '"></div>' +
+        '</div>';
+
+      container.appendChild(card);
+    });
+  }
+
+  window.toggleDiagCard = function(id){
+    var chk = document.getElementById('chk_' + id);
+    var card = document.getElementById('card_' + id);
+    if(chk.checked){
+      card.classList.add('active-selected');
+    } else {
+      card.classList.remove('active-selected');
+    }
+    validateDiagnostic(id);
+  };
+
+  window.validateDiagnostic = function(id){
+    var item = DIAGNOSTIC_ITEMS.find(function(x){ return x.id === id; });
+    var cat = document.getElementById('cat_' + id).value;
+    var impIdx = document.getElementById('imp_' + id).value;
+    var fb = document.getElementById('fb_' + id);
+
+    if(!cat || impIdx === ""){
+      fb.className = 'feedback-badge';
+      fb.innerText = '';
+      return;
+    }
+
+    if(cat === item.correctCategory && parseInt(impIdx) === item.correctOptionIdx){
+      fb.className = 'feedback-badge correct';
+      fb.innerText = '✔ Correct';
+    } else {
+      fb.className = 'feedback-badge incorrect';
+      fb.innerText = '✘ Incorrect';
+    }
+  };
+
+  var selectedDir = null;
+
+  function renderPathCards(){
+    var cards = document.querySelectorAll('.path-card');
+    cards.forEach(function(card){
+      card.addEventListener('click', function(){
+        cards.forEach(function(c){ c.classList.remove('active'); });
+        card.classList.add('active');
+        selectedDir = card.getAttribute('data-dir');
+        updateDragTable();
+      });
+    });
+  }
+
+  window.validateRefinementCount = function(){
+    var checked = document.querySelectorAll('.mod-refine-check:checked');
+    var warn = document.getElementById('refineWarn');
+    if(checked.length < 2 || checked.length > 3){
+      warn.className = 'validation-msg warn';
+      warn.innerText = 'Please select 2 to 3 refinements (including mandatory 3 trials). Currently selected: ' + checked.length;
+    } else {
+      warn.className = 'validation-msg ok';
+      warn.innerText = '✔ Valid selection: ' + checked.length + ' refinements selected.';
+    }
+    updateDragTable();
+  };
+
+  /* ---------------- DRAG AND DROP MATCHING LOGIC (PREPOPULATED) ---------------- */
+
+  window.updateDragTable = function(){
+    var dragSection = document.getElementById('dragSection');
+    var pool = document.getElementById('dragPool');
+    var tbody = document.getElementById('matchTableBody');
+
+    var checkedRefinements = document.querySelectorAll('.mod-refine-check:checked');
+    if(!selectedDir || checkedRefinements.length < 2 || checkedRefinements.length > 3){
+      dragSection.classList.remove('show');
+      return;
+    }
+    dragSection.classList.add('show');
+
+    pool.innerHTML = '';
+    
+    // Gather matching keys for selected modifications
+    var activeModKeys = [];
+    activeModKeys.push(selectedDir);
+    checkedRefinements.forEach(function(c){ activeModKeys.push(c.id); });
+
+    // Prepopulate exactly one limitation card for each selected modification
+    activeModKeys.forEach(function(modKey){
+      var item = DIAGNOSTIC_ITEMS.find(function(x){ return x.matchedModKey === modKey; });
+      if(item){
+        var cardEl = document.createElement('div');
+        cardEl.className = 'drag-card-item';
+        cardEl.draggable = true;
+        cardEl.id = 'drag_' + item.id;
+        cardEl.setAttribute('data-itemid', item.id);
+        cardEl.ondragstart = dragStart;
+
+        var justificationText = item.options[0];
+
+        cardEl.innerHTML = '<strong>' + item.correctCategory + ':</strong> ' + item.text + 
+          '<br><em style="font-size:11px; color:var(--teal-deep);">' + justificationText + '</em>';
+        pool.appendChild(cardEl);
+      }
+    });
+
+    tbody.innerHTML = '';
+    
+    // 1. Directional Row
+    var pathInfo = PATHS[selectedDir];
+    var trDir = document.createElement('tr');
+    trDir.innerHTML = 
+      '<td>' +
+        '<div class="drop-zone" data-expected="' + selectedDir + '" ondragover="allowDrop(event)" ondrop="dropToZone(event)"></div>' +
+      '</td>' +
+      '<td>' +
+        '<span class="badge-type ' + (pathInfo.type === 'Extension' ? 'badge-extend' : 'badge-redirect') + '">' + pathInfo.type + '</span><br>' +
+        '<strong>' + pathInfo.name + '</strong><br>' +
+        '<span style="font-size:11.5px; color:var(--ink-soft);">' + pathInfo.justification + '</span>' +
+      '</td>' +
+      '<td style="text-align:center;"><div class="row-status" id="status_dir"></div></td>';
+    tbody.appendChild(trDir);
+
+    // 2. Refinement Rows
+    checkedRefinements.forEach(function(c){
+      var refInfo = REFINEMENT_MAP[c.id];
+      if(refInfo){
+        var tr = document.createElement('tr');
+        tr.innerHTML = 
+          '<td>' +
+            '<div class="drop-zone" data-expected="' + refInfo.id + '" ondragover="allowDrop(event)" ondrop="dropToZone(event)"></div>' +
+          '</td>' +
+          '<td>' +
+            '<span class="badge-type badge-refine">Refinement</span><br>' +
+            '<strong>' + refInfo.name + '</strong><br>' +
+            '<span style="font-size:11.5px; color:var(--ink-soft);">' + refInfo.justification + '</span>' +
+          '</td>' +
+          '<td style="text-align:center;"><div class="row-status" id="status_' + refInfo.id + '"></div></td>';
+        tbody.appendChild(tr);
+      }
+    });
+  };
+
+  /* Drag Handlers */
+  window.allowDrop = function(ev){
+    ev.preventDefault();
+    if(ev.target.classList.contains('drop-zone')){
+      ev.target.classList.add('drag-over');
+    }
+  };
+
+  window.dragStart = function(ev){
+    ev.dataTransfer.setData("text/plain", ev.target.id);
+  };
+
+  window.dropToZone = function(ev){
+    ev.preventDefault();
+    var zone = ev.target.closest('.drop-zone');
+    if(!zone) return;
+    zone.classList.remove('drag-over');
+
+    var cardId = ev.dataTransfer.getData("text/plain");
+    var cardEl = document.getElementById(cardId);
+    if(cardEl){
+      zone.appendChild(cardEl);
+      zone.classList.add('has-item');
+    }
+  };
+
+  window.dropToPool = function(ev){
+    ev.preventDefault();
+    var pool = document.getElementById('dragPool');
+    var cardId = ev.dataTransfer.getData("text/plain");
+    var cardEl = document.getElementById(cardId);
+    if(cardEl){
+      pool.appendChild(cardEl);
+    }
+  };
+
+  window.checkMatching = function(){
+    var zones = document.querySelectorAll('.drop-zone');
+    zones.forEach(function(zone){
+      var expectedRef = zone.getAttribute('data-expected');
+      var statusEl = zone.closest('tr').querySelector('.row-status');
+      var card = zone.querySelector('.drag-card-item');
+
+      if(!card){
+        statusEl.className = 'row-status incorrect';
+        statusEl.innerText = '✘ Empty';
+        return;
+      }
+
+      var itemId = card.getAttribute('data-itemid');
+      var itemObj = DIAGNOSTIC_ITEMS.find(function(x){ return x.id === itemId; });
+
+      if(itemObj && itemObj.matchedModKey === expectedRef){
+        statusEl.className = 'row-status correct';
+        statusEl.innerText = '✔';
+      } else {
+        statusEl.className = 'row-status incorrect';
+        statusEl.innerText = '✘';
+      }
+    });
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    initOriginalTable();
+    renderDiagnosticCards();
+    renderPathCards();
+    validateRefinementCount();
+  });
+
+})();
+</script>
+</body>
+</html>
