@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analysing Modified Data - Rate of Reaction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --paper: #EEF0E6;
+      --paper-deep: #E3E7D6;
+      --ink: #1E2A24;
+      --ink-soft: #4B5A50;
+      --teal: #164C43;
+      --teal-deep: #0E362F;
+      --rust: #C1502E;
+      --rust-soft: #F1DACB;
+      --sage: #6B8F71;
+      --sage-soft: #DCE6D6;
+      --amber: #B8842E;
+      --amber-soft: #F1E2C3;
+      --line: #C7CDBC;
+      --white: #FBFBF7;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'IBM Plex Sans', sans-serif;
+      line-height: 1.55;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: 
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 36px 36px;
+      opacity: 0.28;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 24px 40px;
+    }
+
+    /* Top Navigation Link */
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 20px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      color: var(--teal-deep);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .nav-back:hover {
+      color: var(--rust);
+    }
+
+    header.hero {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    /* Equation Badge */
+    .eq-badge {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      padding: 8px 14px;
+      border-radius: 4px;
+      color: var(--ink-soft);
+      margin-top: 12px;
+      margin-bottom: 12px;
+    }
+
+    .eq-badge .formula-line {
+      font-weight: 600;
+      color: var(--teal-deep);
+    }
+
+    h1.title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(24px, 3.2vw, 36px);
+      line-height: 1.15;
+      color: var(--teal-deep);
+      margin: 10px 0 6px 0;
+    }
+
+    .title .accent {
+      color: var(--rust);
+    }
+
+    p.subtitle {
+      max-width: 68ch;
+      color: var(--ink-soft);
+      font-size: 14.5px;
+      margin: 0;
+    }
+
+    .doc-card {
+      background: var(--white);
+      border: 1.5px solid var(--teal);
+      border-radius: 6px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+
+    .doc-card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--teal-deep);
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+
+    .doc-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--teal-deep);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    .formula-box {
+      background: var(--paper);
+      border-left: 4px solid var(--teal);
+      padding: 8px 12px;
+      border-radius: 0 4px 4px 0;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      color: var(--teal-deep);
+      display: inline-block;
+    }
+
+    /* Vertical Fraction Layout */
+    .frac-expression {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fraction {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+    }
+
+    .fraction .num {
+      border-bottom: 1.5px solid var(--teal-deep);
+      padding-bottom: 2px;
+      display: block;
+    }
+
+    .fraction .den {
+      padding-top: 2px;
+      display: block;
+    }
+
+    .video-card {
+      background: var(--paper-deep);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--teal-deep);
+      color: var(--white);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 10px 18px;
+      border-radius: 4px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+
+    .btn-action:hover {
+      background: var(--rust);
+      transform: translateY(-1px);
+    }
+
+    .btn-toggle {
+      background: var(--amber);
+    }
+
+    .btn-toggle:hover {
+      background: var(--teal-deep);
+    }
+
+    /* Collapsible Mass Loss Section */
+    #mass-loss-section {
+      display: none;
+      background: var(--amber-soft);
+      border: 1.5px solid var(--amber);
+      border-radius: 6px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    /* Custom Structured Table */
+    .calc-table-container {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--white);
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    .calc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+      /* Prevent Copying Text */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    .calc-table th {
+      background: var(--teal-deep);
+      color: var(--white);
+      font-weight: 600;
+      padding: 10px 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      border: 1px solid var(--line);
+    }
+
+    .calc-table td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    .calc-table td.calc-name {
+      font-weight: 600;
+      color: var(--teal-deep);
+      width: 20%;
+    }
+
+    .calc-table td.calc-formula {
+      width: 40%;
+    }
+
+    .calc-table td.calc-example {
+      width: 40%;
+      background: var(--paper);
+    }
+
+    .report-list {
+      margin: 12px 0 0 20px;
+      padding: 0;
+      font-size: 13.5px;
+      color: var(--ink);
+    }
+
+    .report-list li {
+      margin-bottom: 10px;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 20px 0 40px;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  
+  <a href="https://shearert7.github.io/rateofreaction/" class="nav-back">← Back to Main Suite</a>
+
+  <header class="hero">
+    <div class="eq-badge">
+      <div>Calcium Carbonate (s) + Hydrochloric Acid (aq) → Calcium Chloride (aq) + Carbon Dioxide (g) + Water (l)</div>
+      <div class="formula-line">CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + CO₂(g) + H₂O(l)</div>
+    </div>
+    <h1 class="title"><span class="accent">Data Analysis:</span> Analysing Modified Data</h1>
+    <p class="subtitle">Mathematical processes and formulas for processing experimental trial data, calculating reaction rates, and quantifying uncertainty.</p>
+  </header>
+
+  <!-- VIDEO TUTORIAL DIRECT LINK -->
+  <div class="doc-card">
+    <h2>1. Data Analysis Walkthrough</h2>
+    <p style="font-size: 13.5px; color: var(--ink-soft);">
+      Watch the full walkthrough video detailing step-by-step spreadsheet analysis and data processing:
+    </p>
+
+    <div class="video-card">
+      <div>
+        <h4 style="margin: 0 0 4px 0; font-family: 'Space Grotesk', sans-serif;">📹 Video Tutorial: Complete Data Analysis Guide</h4>
+        <p style="margin: 0; font-size: 13px; color: var(--ink-soft);">Opens in a new tab on Google Drive.</p>
+      </div>
+      <a href="https://drive.google.com/file/d/1KJoYhYXSKqFAhjxKi0fULqqaSToFW65H/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-action">
+        Open Video Guide ↗
+      </a>
+    </div>
+
+    <!-- Mass Loss Refinement Toggle Button -->
+    <div style="margin-top: 16px;">
+      <button id="toggle-btn" class="btn-action btn-toggle" onclick="toggleMassLoss()">
+        + Method Refinement: Mass Loss Method?
+      </button>
+    </div>
+
+    <!-- Hidden Refinement Section -->
+    <div id="mass-loss-section">
+      <h3 style="margin-top: 0; color: var(--teal-deep);">Mass Displacement Method (Mass Loss Analysis)</h3>
+      <p style="font-size: 13.5px; color: var(--ink);">
+        If your experimental refinement measured mass loss (via mass balance displacement) instead of collecting gas volume, perform this preparatory step for every recorded time interval before calculating mean values:
+      </p>
+
+      <div class="formula-box">
+        Mass Lost (g) = Initial Total Mass (g) - Recorded Mass at Time t (g)
+      </div>
+
+      <div class="video-card" style="background: var(--white); margin-bottom: 0;">
+        <div>
+          <h4 style="margin: 0 0 4px 0; font-family: 'Space Grotesk', sans-serif;">📹 Video Guide: Mass Loss Method Analysis</h4>
+          <p style="margin: 0; font-size: 13px; color: var(--ink-soft);">Watch the walkthrough specifically for processing mass displacement data.</p>
+        </div>
+        <a href="https://drive.google.com/file/d/1eBKWCRY-DyYDQEFuwMjkaKPgLp61JAgW/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-action">
+          Open Mass Loss Guide ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATHEMATICAL ANALYSIS BACKGROUND TABLE -->
+  <div class="doc-card">
+    <h2>2. Background & Calculation Foundations</h2>
+    <p style="font-size: 13.5px; color: var(--ink-soft);">
+      Use the following formulas and mathematical methods to process your experimental trials:
+    </p>
+
+    <div class="calc-table-container">
+      <table class="calc-table">
+        <thead>
+          <tr>
+            <th>Calculation</th>
+            <th>Formula</th>
+            <th>Example Calculation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="calc-name">1. Mean (Average)</td>
+            <td class="calc-formula">
+              <div class="formula-box">
+                <span class="frac-expression">
+                  Mean = 
+                  <span class="fraction">
+                    <span class="num">Trial 1 + Trial 2 + Trial 3</span>
+                    <span class="den">3</span>
+                  </span>
+                </span>
+              </div>
+            </td>
+            <td class="calc-example">
+              If trial volumes at t = 30s are 112 mL, 124 mL, and 133 mL:<br><br>
+              <span class="frac-expression">
+                <strong>Mean</strong> = 
+                <span class="fraction">
+                  <span class="num">112 + 124 + 133</span>
+                  <span class="den">3</span>
+                </span>
+                = <strong>123.0 mL</strong>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="calc-name">2. Rate of Reaction</td>
+            <td class="calc-formula">
+              <div class="formula-box">
+                <span class="frac-expression">
+                  Rate = 
+                  <span class="fraction">
+                    <span class="num">Gas Produced (mL or g)</span>
+                    <span class="den">Time (s)</span>
+                  </span>
+                </span>
+              </div>
+            </td>
+            <td class="calc-example">
+              If 123.0 mL of gas is produced over 30 seconds:<br><br>
+              <span class="frac-expression">
+                <strong>Rate</strong> = 
+                <span class="fraction">
+                  <span class="num">123.0</span>
+                  <span class="den">30</span>
+                </span>
+                = <strong>4.10 mL/s</strong>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="calc-name">3. Absolute Error</td>
+            <td class="calc-formula">
+              <div class="formula-box">
+                <span class="frac-expression">
+                  Absolute Error = 
+                  <span class="fraction">
+                    <span class="num">Max Value - Min Value</span>
+                    <span class="den">2</span>
+                  </span>
+                </span>
+              </div>
+            </td>
+            <td class="calc-example">
+              For trials with values 112 mL, 124 mL, and 133 mL:<br><br>
+              <span class="frac-expression">
+                <strong>Absolute Error</strong> = 
+                <span class="fraction">
+                  <span class="num">133 - 112</span>
+                  <span class="den">2</span>
+                </span>
+                = <strong>10.5 mL</strong>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="calc-name">4. Percentage Error</td>
+            <td class="calc-formula">
+              <div class="formula-box">
+                <span class="frac-expression">
+                  % Error = 
+                  <span class="fraction">
+                    <span class="num">Absolute Error</span>
+                    <span class="den">Mean</span>
+                  </span>
+                  × 100
+                </span>
+              </div>
+            </td>
+            <td class="calc-example">
+              Using Absolute Error = 10.5 mL and Mean = 123.0 mL:<br><br>
+              <span class="frac-expression">
+                <strong>% Error</strong> = 
+                <span class="fraction">
+                  <span class="num">10.5</span>
+                  <span class="den">123.0</span>
+                </span>
+                × 100 = <strong>8.54%</strong>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 3: REPORT WRITING & PROCESSED DATA -->
+  <div class="doc-card">
+    <h2>3. Presenting Processed Data in Your Report</h2>
+    <p style="font-size: 13.5px; color: var(--ink-soft);">
+      In your scientific report, all processed data must be clearly presented in the <strong>Processed Data</strong> section. Ensure you include the following elements:
+    </p>
+
+    <ul class="report-list">
+      <li>
+        <strong>Tables of Processed Data:</strong> Present structured summary tables that detail the average CO₂ produced over time, calculated rate of reaction, and both absolute and percentage uncertainties for each experimental condition.
+      </li>
+      <li>
+        <strong>Sample Calculations:</strong> Include one clear, step-by-step example for each calculation type (Mean, Rate of Reaction, Absolute Error, and Percentage Error) showing the general formula, substituted numbers, and final units.
+      </li>
+      <li>
+        <strong>Graphical Representation:</strong> Include a fully labeled graph showing CO₂ produced over time (or mass lost over time) across your tested conditions, including trendlines and appropriate error bars where applicable.
+      </li>
+    </ul>
+  </div>
+
+  <footer>
+    Rate of Reaction Practical Suite — Data Analysis Module.
+  </footer>
+
+</div>
+
+<script>
+  function toggleMassLoss() {
+    const section = document.getElementById('mass-loss-section');
+    const btn = document.getElementById('toggle-btn');
+    
+    if (section.style.display === 'none' || section.style.display === '') {
+      section.style.display = 'block';
+      btn.textContent = '- Hide Mass Loss Analysis Step';
+    } else {
+      section.style.display = 'none';
+      btn.textContent = '+ Method Refinement: Mass Loss Method?';
+    }
+  }
+</script>
+
+</body>
+</html>
