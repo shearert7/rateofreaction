@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Experiment: Writing the Report — Rate of Reaction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EEF0E6;
+    --paper-deep: #E3E7D6;
+    --ink: #1E2A24;
+    --ink-soft: #4B5A50;
+    --teal: #164C43;
+    --teal-deep: #0E362F;
+    --rust: #C1502E;
+    --rust-soft: #F1DACB;
+    --sage: #6B8F71;
+    --sage-soft: #DCE6D6;
+    --amber: #B8842E;
+    --amber-soft: #F1E2C3;
+    --line: #C7CDBC;
+    --white: #FBFBF7;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.55;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 36px 36px;
+    opacity: 0.28;
+  }
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; font-weight: 600; color: var(--teal-deep); margin: 0; }
+  .wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  code, .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* ---------- HERO & HEADER ---------- */
+  header.hero {
+    padding: 24px 0 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px;
+    color: var(--rust); text-decoration: none; margin-bottom: 14px;
+    transition: color 0.15s ease;
+  }
+  .back-link:hover { color: var(--teal-deep); text-decoration: underline; }
+  .eq-container {
+    background: var(--white); border: 1px solid var(--line);
+    padding: 10px 14px; border-radius: 4px; margin-bottom: 16px;
+  }
+  .word-eq { font-size: 13.5px; color: var(--ink-soft); font-weight: 500; margin-bottom: 4px; }
+  .chem-eq { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--teal-deep); font-weight: 500; }
+  h1.title { font-size: clamp(26px, 3.2vw, 38px); line-height: 1.15; margin-bottom: 8px; }
+  .hero-subtitle { font-size: 15px; color: var(--ink-soft); max-width: 850px; line-height: 1.5; }
+
+  /* ---------- PROGRESS BAR ---------- */
+  .progress-bar-wrap {
+    position: sticky; top: 0; z-index: 5; background: var(--paper);
+    border-bottom: 1px solid var(--line); padding: 10px 0; margin-top: 10px;
+  }
+  .progress-row { display: flex; align-items: center; gap: 14px; }
+  .progress-track { flex: 1; height: 8px; background: var(--paper-deep); border-radius: 5px; overflow: hidden; border: 1px solid var(--line); }
+  .progress-fill { height: 100%; width: 0%; background: var(--sage); transition: width .25s ease; }
+  .progress-label { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
+
+  /* ---------- MAIN TABS ---------- */
+  .tabs { display: flex; gap: 6px; margin: 20px 0 0; }
+  .tab-btn {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px;
+    background: none; border: none; padding: 10px 4px; cursor: pointer;
+    color: var(--ink-soft); border-bottom: 3px solid transparent; margin-right: 22px;
+  }
+  .tab-btn.active { color: var(--teal-deep); border-bottom-color: var(--rust); }
+  .tab-panel { display: none; padding: 24px 0 60px; }
+  .tab-panel.active { display: block; }
+
+  /* ---------- REPORT GUIDE LAYOUT ---------- */
+  .guide-layout { display: grid; grid-template-columns: 230px 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 820px) { .guide-layout { grid-template-columns: 1fr; } }
+
+  nav.section-nav { position: sticky; top: 60px; }
+  nav.section-nav ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--line); }
+  nav.section-nav a {
+    display: block; padding: 7px 12px; font-size: 13px; color: var(--ink-soft);
+    text-decoration: none; border-left: 2px solid transparent; margin-left: -1px;
+  }
+  nav.section-nav a:hover { color: var(--teal-deep); }
+  nav.section-nav a.done { color: var(--sage); font-weight: 500; }
+  nav.section-nav a.done::after { content: " ✓"; }
+  @media (max-width: 820px) {
+    nav.section-nav { position: static; overflow-x: auto; white-space: nowrap; padding-bottom: 6px; }
+    nav.section-nav ol { display: flex; border-left: none; gap: 6px; }
+    nav.section-nav a { border: 1px solid var(--line); border-radius: 16px; padding: 5px 10px; }
+  }
+
+  details.section {
+    background: var(--white); border: 1px solid var(--line); border-radius: 6px;
+    margin-bottom: 12px; scroll-margin-top: 68px;
+  }
+  details.section > summary {
+    list-style: none; cursor: pointer; padding: 14px 16px;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  details.section > summary::-webkit-details-marker { display: none; }
+  details.section > summary .chev {
+    font-family: 'IBM Plex Mono', monospace; color: var(--ink-soft); font-size: 13px;
+    transition: transform .15s ease; margin-top: 2px;
+  }
+  details.section[open] > summary .chev { transform: rotate(90deg); }
+  .sec-num { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--rust); min-width: 22px; padding-top: 2px; }
+  .sec-head { flex: 1; }
+  .sec-head h3 { font-size: 17px; }
+  .sec-purpose { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+  .sec-check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-soft); }
+  .sec-check input { width: 16px; height: 16px; accent-color: var(--sage); cursor: pointer; }
+  .sec-body { padding: 0 16px 18px 50px; }
+  .sec-body ul { margin: 0 0 10px; padding-left: 18px; }
+  .sec-body li { margin-bottom: 5px; font-size: 14px; }
+  
+  .ismg-box {
+    background: var(--paper-deep); border-left: 3px solid var(--teal);
+    padding: 10px 14px; margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 13px;
+  }
+  .ismg-box strong { color: var(--teal-deep); }
+  .ismg-criteria { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; color: var(--rust); margin-bottom: 4px; font-weight: 600; }
+
+  /* TOOLTIP STYLES */
+  .tooltip-term {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dashed var(--rust);
+    color: var(--rust);
+    font-weight: 600;
+  }
+  .tooltip-term:hover::after {
+    content: "A 'considered' response uses subject matter to explore the purpose and relevance of the experiment. It also explains the significance of the variables used in the investigation. In comparison, a mid-performance level response only describes the purpose of the experiment.";
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    padding: 10px 12px;
+    background-color: var(--teal-deep);
+    color: var(--white);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    border-radius: 5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+    pointer-events: none;
+    text-transform: none;
+  }
+  .tooltip-term:hover::before {
+    content: "";
+    position: absolute;
+    bottom: 115%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--teal-deep) transparent transparent transparent;
+    z-index: 100;
+    pointer-events: none;
+  }
+  
+  .length-note { font-size: 12.5px; color: var(--ink-soft); font-style: italic; margin-top: 6px; }
+
+  /* TABLES */
+  .custom-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  .custom-table th, .custom-table td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+  .custom-table th { background: var(--paper-deep); font-family: 'Space Grotesk', sans-serif; font-weight: 600; }
+
+  /* ---------- QUICK REFERENCE ---------- */
+  .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 820px) { .ref-grid { grid-template-columns: 1fr; } }
+  .ref-card { background: var(--white); border: 1px solid var(--line); border-radius: 6px; padding: 18px; }
+  .ref-card h4 { font-size: 15px; margin-bottom: 10px; }
+  
+  .formula-row { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+  .formula-row:last-child { border-bottom: none; }
+  .formula-row .fname { color: var(--ink-soft); min-width: 140px; }
+  .formula-row .fval { font-family: 'IBM Plex Mono', monospace; text-align: right; font-weight: 500; }
+
+  /* Word counter */
+  .wc-card { grid-column: 1 / -1; }
+  textarea.wc-input {
+    width: 100%; min-height: 130px; border: 1px solid var(--line); border-radius: 5px;
+    padding: 10px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13.5px; resize: vertical;
+    background: var(--paper); color: var(--ink);
+  }
+  .wc-result { display: flex; gap: 24px; margin-top: 10px; flex-wrap: wrap; }
+  .wc-stat .num { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; color: var(--teal-deep); }
+  .wc-stat .lbl { font-size: 12px; color: var(--ink-soft); }
+
+  /* ---------- SUB-TABS STYLING ---------- */
+  .sec4-subtabs-nav-wrapper {
+    overflow-x: auto; border-bottom: 2px solid var(--line); margin-bottom: 18px; padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sec4-subtabs-nav {
+    display: flex; gap: 8px; min-width: max-content; list-style: none; padding: 0; margin: 0;
+  }
+  .sec4-tab-btn {
+    background: var(--paper); border: 1px solid var(--line); border-bottom: none; border-radius: 4px 4px 0 0;
+    padding: 8px 14px; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--ink-soft); cursor: pointer; transition: all 0.2s ease;
+  }
+  .sec4-tab-btn:hover { background: var(--paper-deep); color: var(--teal-deep); }
+  .sec4-tab-btn.active { background: var(--teal-deep); color: var(--white); border-color: var(--teal-deep); }
+  
+  .sec4-tab-panel { display: none; animation: fadeIn 0.25s ease-in-out; }
+  .sec4-tab-panel.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .report-heading {
+    font-family: 'Space Grotesk', sans-serif; color: var(--teal-deep); margin-top: 0; margin-bottom: 12px;
+    font-size: 18px; border-bottom: 2px solid var(--sage-soft); padding-bottom: 4px;
+  }
+  .report-subheading {
+    font-family: 'Space Grotesk', sans-serif; color: var(--rust); margin-top: 16px; margin-bottom: 8px; font-size: 15px;
+  }
+  .report-text { font-size: 13.5px; color: var(--ink); line-height: 1.6; margin-bottom: 12px; }
+
+  .callout-box {
+    background: var(--paper-deep); border-left: 4px solid var(--teal); padding: 12px 16px;
+    border-radius: 0 4px 4px 0; margin: 14px 0; font-size: 13px;
+  }
+  .table-caption { font-size: 12px; color: var(--ink-soft); margin-top: 4px; font-style: italic; }
+  .ref-list { padding-left: 18px; font-size: 13px; line-height: 1.6; }
+  .ref-list li { margin-bottom: 8px; word-break: break-word; }
+
+  .lim-box {
+    background: var(--white); border: 1.5px solid var(--teal); border-radius: 6px;
+    padding: 20px; margin-top: 10px;
+  }
+
+  footer { border-top: 1px solid var(--line); padding: 20px 0 50px; font-size: 12.5px; color: var(--ink-soft); margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <a href="https://shearert7.github.io/rateofreaction/index.html" class="back-link">← Back to Main Suite</a>
+    
+    <div class="eq-container">
+      <div class="word-eq">Calcium Carbonate (s) + Hydrochloric Acid (aq) → Calcium Chloride (aq) + Carbon Dioxide (g) + Water (l)</div>
+      <div class="chem-eq">CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + CO₂(g) + H₂O(l)</div>
+    </div>
+    
+    <h1 class="title">Student Experiment: Writing the Report</h1>
+    <div class="hero-subtitle">Step-by-step guidance, ISMG breakdowns, and structured scaffold to help you construct your written scientific report.</div>
+  </header>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar-wrap">
+    <div class="progress-row">
+      <span class="progress-label" id="progressLabel">0 / 10 sections marked done</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+
+  <!-- MAIN TABS -->
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" id="tabBtnGuide" onclick="switchTab('guide')">Report Writing Guide & ISMG Criteria</button>
+    <button class="tab-btn" id="tabBtnReport" onclick="switchTab('report')">Formal Student Experiment Report (Exemplar)</button>
+    <button class="tab-btn" id="tabBtnRef" onclick="switchTab('ref')">Quick Reference & Calculations</button>
+  </div>
+
+  <!-- TAB 1: REPORT GUIDE -->
+  <div class="tab-panel active" id="tabGuide">
+    <div class="guide-layout">
+      <nav class="section-nav" id="sectionNav" aria-label="Report sections"></nav>
+      <div id="sectionList"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: EXEMPLAR FORMAL REPORT -->
+  <div class="tab-panel" id="tabReport">
+    <div class="lim-box">
+      <h2 style="margin-bottom: 6px;">Formal Student Experiment Exemplar Report</h2>
+      <p style="margin-bottom: 18px;">Complete, fully structured classroom investigation report examining the effect of concentration on reaction rate[cite: 2, 7]. Navigate the tabs below to read each formal component.</p>
+      
+      <!-- SUB-TABS NAVIGATION -->
+      <div class="sec4-subtabs-nav-wrapper">
+        <ul class="sec4-subtabs-nav" role="tablist">
+          <li><button class="sec4-tab-btn active" onclick="openSec4Tab(event, 'sec4-rationale')">Rationale</button></li>
+          <li><button class="sec4-tab-btn" onclick="openSec4Tab(event, 'sec4-rq')">Research Question</button></li>
+          <li><button class="sec4-tab-btn" onclick="openSec4Tab(event, 'sec4-modifications')">Modifications</button></li>
+          <li><button class="sec4-tab-btn" onclick="openSec4Tab(event, 'sec4-risk')">Risk Assessment</button></li>
+          <li><button class="sec4-tab-btn" onclick="openSec4Tab(event, 'sec4-results')">Results</button></li>
+          <li><button class="sec4-tab-btn" onclick="openSec4Tab(event, 'sec4-analysis')">Analysis & Interpretation</button></li>
+          <li><button class="sec4-tab-btn" onclick="openSec4Tab(event, 'sec4-evaluation')">Evaluation</button></li>
+          <li><button class="sec4-tab-btn" onclick="openSec4Tab(event, 'sec4-conclusion')">Conclusion</button></li>
+          <li><button class="sec4-tab-btn" onclick="openSec4Tab(event, 'sec4-references')">References</button></li>
+          <li><button class="sec4-tab-btn" onclick="openSec4Tab(event, 'sec4-appendices')">Appendices</button></li>
+        </ul>
+      </div>
+
+      <!-- SUB-TAB 1: RATIONALE -->
+      <div id="sec4-rationale" class="sec4-tab-panel active">
+        <h3 class="report-heading">Rationale</h3>
+        <p class="report-text">
+          A chemical reaction involves the reorganization of atoms through the breaking and forming of chemical bonds to transform reactant substances into distinct products (Muley, 2023)[cite: 2]. Investigating chemical kinetics—specifically the rate of reaction—is critical for understanding industrial production efficiency and reaction dynamics (Monash University, 2025)[cite: 2]. The rate of reaction quantifies the speed at which reactants are consumed or products are formed over time, typically calculated using:
+        </p>
+        
+        <div class="eq-badge" style="width: 100%; margin: 6px 0 12px; font-family:'IBM Plex Mono', monospace; font-size:13px; background:var(--paper); padding:6px 12px; border:1px solid var(--line); border-radius:3px;">
+          <div><strong>Reaction Rate Formula:</strong> Rate = Δ[Concentration or Volume or Mass] / Δtime</div>
+        </div>
+
+        <p class="report-text">
+          According to Collision Theory, a chemical reaction occurs only when reactant particles collide with sufficient kinetic energy—equal to or greater than the activation energy ($E_a$)—and with the correct steric orientation (Agnew, 2025)[cite: 2]. Factors influencing reaction rates include temperature, surface area, presence of catalysts, pressure, and reactant concentration (Monash University, 2025)[cite: 2]. In acid-carbonate systems, such as calcium carbonate ($\text{CaCO}_3$) reacting with hydrochloric acid ($\text{HCl}$), the reaction yields carbon dioxide gas ($\text{CO}_2$), water, and calcium chloride (Clark, 2020)[cite: 2]:
+        </p>
+
+        <div class="eq-badge" style="width: 100%; margin: 6px 0 12px; font-family:'IBM Plex Mono', monospace; font-size:13px; background:var(--paper); padding:6px 12px; border:1px solid var(--line); border-radius:3px;">
+          <div><strong>Acid-Carbonate Reaction:</strong> CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + CO₂(g) + H₂O(l)</div>
+        </div>
+
+        <p class="report-text">
+          An original experiment was conducted to observe this reaction system by comparing the reaction rate of powdered calcium carbonate against large calcium carbonate chunks when reacted with 0.5M hydrochloric acid (see Appendix 1 for full methodology of the original experiment)[cite: 2]. The findings demonstrated that increasing surface area significantly increased the rate of $\text{CO}_2$ gas displacement, producing $1.47\text{ mL/30s}$ for powder compared to $0.03\text{ mL/30s}$ for chunks[cite: 2]. However, there were a number of significant limitations associated with the original experiment (see Table 1), which have been addressed in the modified experiment[cite: 2].
+        </p>
+
+        <p class="report-text">
+          The purpose of this modified experiment was to systematically investigate how varying the concentration of hydrochloric acid affects the rate of $\text{CO}_2$ gas production while holding surface area constant[cite: 2]. Concentration refers to the quantity of solute particles present per unit volume of solution. Increasing concentration increases particle density per unit volume, which collision theory predicts will elevate the frequency of successful collisions between $\text{H}^+$ ions and $\text{CaCO}_3$ particles per unit time[cite: 2]. To address the limitations of single-trial observations and narrow data ranges, the original methodology was modified by extending the independent variable to five distinct concentrations ($0.1\text{M}$ to $2.0\text{M}$) and incorporating three trials per concentration to improve precision and calculate statistical uncertainties[cite: 2, 8]. Therefore, the following research question was developed:
+        </p>
+
+        <div class="callout-box">
+          <strong>Research Question:</strong> How does changing the concentration of hydrochloric acid (HCl) across 0.1M, 0.5M, 1.0M, 1.5M, and 2.0M affect the rate of carbon dioxide (CO₂) gas production (mL/s) when reacted with 0.5g of calcium carbonate (CaCO₃)?[cite: 2]
+        </div>
+      </div>
+
+      <!-- SUB-TAB 2: RESEARCH QUESTION -->
+      <div id="sec4-rq" class="sec4-tab-panel">
+        <h3 class="report-heading">Research Question</h3>
+        <div class="callout-box">
+          <strong>Research Question:</strong> How does changing the concentration of hydrochloric acid (HCl) across 0.1M, 0.5M, 1.0M, 1.5M, and 2.0M affect the rate of carbon dioxide (CO₂) gas production (mL/s) when reacted with 0.5g of calcium carbonate (CaCO₃)?[cite: 2]
+        </div>
+      </div>
+
+      <!-- SUB-TAB 3: MODIFICATIONS -->
+      <div id="sec4-modifications" class="sec4-tab-panel">
+        <h3 class="report-heading">Modifications to Original Methodology</h3>
+        <p class="report-text">
+          To address limitations of the preliminary experiment and collect sufficient, relevant data to evaluate the research question, specific refinements and redirections were implemented[cite: 2, 4, 5, 8]:
+        </p>
+
+        <h4 class="report-subheading">Table 1: Summary of Modifications and Justifications</h4>
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Original Limitation</th>
+              <th>Modification Implemented</th>
+              <th>Justification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Only 1 trial per variation conducted[cite: 2].</td>
+              <td><strong>Refinement:</strong> 3 trials conducted for each concentration[cite: 2].</td>
+              <td>Increases reliability, allows calculation of mean values, and identifies anomalies[cite: 2, 8].</td>
+            </tr>
+            <tr>
+              <td>Only 2 particle sizes tested[cite: 2].</td>
+              <td><strong>Redirection:</strong> 5 variations of HCl concentration tested (0.1M to 2M)[cite: 2].</td>
+              <td>Provides a sufficient data range to evaluate quantitative mathematical trends[cite: 2, 8].</td>
+            </tr>
+            <tr>
+              <td>30-second measurement interval[cite: 2].</td>
+              <td><strong>Refinement:</strong> Data recorded every 15 seconds[cite: 2].</td>
+              <td>Increases sampling rate for higher resolution analysis of initial reaction rates[cite: 2].</td>
+            </tr>
+            <tr>
+              <td>Initial gas loss prior to stopper placement[cite: 2].</td>
+              <td><strong>Refinement:</strong> Apparatus set-up adjusted to eliminate initial bubbling loss[cite: 2].</td>
+              <td>Reduces systematic error in volume measurement[cite: 2, 6].</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SUB-TAB 4: RISK ASSESSMENT -->
+      <div id="sec4-risk" class="sec4-tab-panel">
+        <h3 class="report-heading">Risk Assessment & Ethics</h3>
+        <p class="report-text">
+          Safety precautions were identified using RiskAssess (see Appendix 2 for complete risk assessment)[cite: 2].
+        </p>
+
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Chemical / Equipment</th>
+              <th>Potential Hazard</th>
+              <th>Control Measure / Safe Management</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hydrochloric Acid (HCl)</strong>[cite: 2]</td>
+              <td>Skin/eye irritation, corrosive vapors[cite: 2].</td>
+              <td>Wear safety glasses and lab coat. Rinse skin immediately if exposed[cite: 2].</td>
+            </tr>
+            <tr>
+              <td><strong>Glassware (Flask/Cylinder)</strong>[cite: 2]</td>
+              <td>Breakage, sharp glass cuts[cite: 2].</td>
+              <td>Inspect for cracks. Keep away from bench edges[cite: 2].</td>
+            </tr>
+            <tr>
+              <td><strong>Water Spills</strong>[cite: 2]</td>
+              <td>Slip and fall hazard[cite: 2].</td>
+              <td>Wipe spills immediately. Wear enclosed non-slip footwear[cite: 2].</td>
+            </tr>
+            <tr>
+              <td><strong>Ethical Considerations</strong>[cite: 2]</td>
+              <td>N/A[cite: 2]</td>
+              <td>No animals or human subjects were harmed during testing[cite: 2].</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SUB-TAB 5: RESULTS -->
+      <div id="sec4-results" class="sec4-tab-panel">
+        <h3 class="report-heading">Qualitative & Quantitative Data</h3>
+        <p class="report-text">
+          <strong>Qualitative Observations:</strong> Upon contact between CaCO₃ powder and HCl, immediate vigorous effervescence occurred[cite: 2]. CO₂ bubbles rapidly displaced water in the measuring cylinder, with bubble frequency tapering off over time[cite: 2].
+        </p>
+
+        <h4 class="report-subheading">Table 2: Processed Data — Average CO₂ Volume Produced (mL)</h4>
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Time (s)</th>
+              <th>0.1M (mL)</th>
+              <th>0.5M (mL)</th>
+              <th>1.0M (mL)</th>
+              <th>1.5M (mL)</th>
+              <th>2.0M (mL)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
+            <tr><td>15</td><td>0.0</td><td>13.5</td><td>16.5</td><td>5.0</td><td>59.7</td></tr>
+            <tr><td>30</td><td>0.0</td><td>22.5</td><td>24.5</td><td>15.0</td><td>77.3</td></tr>
+            <tr><td>60</td><td>1.0</td><td>35.5</td><td>38.0</td><td>27.0</td><td>92.0</td></tr>
+            <tr><td>120</td><td>2.0</td><td>45.5</td><td>54.0</td><td>45.0</td><td>104.3</td></tr>
+            <tr><td>300</td><td>5.0</td><td>55.3</td><td>73.5</td><td>72.0</td><td>107.0</td></tr>
+          </tbody>
+        </table>
+        <div class="table-caption">Note: Failed trials identified as outliers were excluded from mean calculations[cite: 2].</div>
+
+        <h4 class="report-subheading">Sample Calculations</h4>
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Calculation Type</th>
+              <th>Formula</th>
+              <th>Worked Example (2.0M at t = 15s)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Mean Volume</strong>[cite: 1, 2]</td>
+              <td>Mean = Σ Trials / n[cite: 2, 7]</td>
+              <td>(51 + 67 + 61) / 3 = 59.7 mL[cite: 2]</td>
+            </tr>
+            <tr>
+              <td><strong>Reaction Rate</strong>[cite: 1, 2]</td>
+              <td>Rate = ΔV / Δt[cite: 1, 2]</td>
+              <td>59.7 mL / 15 s = 3.98 mL/s[cite: 2]</td>
+            </tr>
+            <tr>
+              <td><strong>Absolute Error</strong>[cite: 1, 2]</td>
+              <td>Abs. Error = (Max - Min) / 2[cite: 1, 2]</td>
+              <td>(67 - 51) / 2 = ± 8.0 mL[cite: 2]</td>
+            </tr>
+            <tr>
+              <td><strong>Percentage Uncertainty</strong>[cite: 1, 2]</td>
+              <td>% Uncertainty = (Abs. Error / Mean) × 100[cite: 1, 2]</td>
+              <td>(8.0 / 59.7) × 100 = 13.4%[cite: 2]</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SUB-TAB 6: ANALYSIS & INTERPRETATION -->
+      <div id="sec4-analysis" class="sec4-tab-panel">
+        <h3 class="report-heading">Analysis & Interpretation of Evidence</h3>
+        <p class="report-text">
+          The processed data demonstrates a clear direct relationship between hydrochloric acid concentration and the rate of carbon dioxide production[cite: 2]. As concentration increased from 0.1M to 2.0M, the mean reaction rate increased significantly[cite: 2]:
+        </p>
+        
+        <div class="callout-box">
+          <strong>Key Trend Summary:</strong>
+          <ul style="margin: 6px 0 0 16px; padding: 0;">
+            <li><strong>0.1M HCl:</strong> Minimal reaction, yielding an average rate of 0.01 mL/s[cite: 2].</li>
+            <li><strong>0.5M HCl:</strong> Average reaction rate of 0.36 mL/s[cite: 2].</li>
+            <li><strong>1.0M HCl:</strong> Average reaction rate of 0.44 mL/s[cite: 2].</li>
+            <li><strong>2.0M HCl:</strong> Highest initial rate of 3.98 mL/s at 15s, averaging 0.97 mL/s overall[cite: 2].</li>
+          </ul>
+        </div>
+
+        <p class="report-text">
+          <strong>Collision Theory Interpretation:</strong> Increasing acid concentration increases particle density per unit volume[cite: 2]. This decreases the mean distance between H⁺ ions and CaCO₃ particles, leading to a higher frequency of collisions per second and a faster overall reaction rate (Agnew, 2025; Monash University, 2025)[cite: 2].
+        </p>
+        <p class="report-text">
+          Across all tested conditions, the reaction rate was highest during the first 30 seconds and gradually plateaued as reactants were consumed[cite: 2].
+        </p>
+      </div>
+
+      <!-- SUB-TAB 7: EVALUATION -->
+      <div id="sec4-evaluation" class="sec4-tab-panel">
+        <h3 class="report-heading">Uncertainty, Limitations & Evaluation</h3>
+        <p class="report-text">
+          <strong>Uncertainty Analysis:</strong> Percentage uncertainties varied substantially across conditions[cite: 2]:
+        </p>
+        <ul style="margin-bottom: 14px;">
+          <li><strong>2.0M HCl:</strong> Low average uncertainty (5.5%), demonstrating high precision and reliable data[cite: 2].</li>
+          <li><strong>0.1M & 1.5M HCl:</strong> Exhibited extremely high uncertainties (150% and 112.4% respectively) due to multiple failed trials[cite: 2].</li>
+        </ul>
+
+        <h4 class="report-subheading">Table 3: Limitations & Proposed Improvements</h4>
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Limitation & Error Type</th>
+              <th>Impact on Reliability / Validity</th>
+              <th>Suggested Improvement</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Parallax / Meniscus Reading</strong> (Random)[cite: 2]</td>
+              <td>Introduced minor measurement imprecision in volume readings[cite: 2].</td>
+              <td>Align eyes directly at liquid meniscus level[cite: 2].</td>
+            </tr>
+            <tr>
+              <td><strong>Gas Escape During Stopper Insertion</strong> (Random)[cite: 2]</td>
+              <td>Initial gas product escaped, underestimating early reaction rates[cite: 2].</td>
+              <td>Use a rubber septum and syringe system to inject acid into a sealed flask[cite: 2, 4].</td>
+            </tr>
+            <tr>
+              <td><strong>Multi-day Experimentation</strong> (Systematic/Random)[cite: 2]</td>
+              <td>Fluctuations in ambient temperature altered kinetic energy across trials[cite: 2].</td>
+              <td>Conduct all trials in a single session inside a climate-controlled lab[cite: 2].</td>
+            </tr>
+            <tr>
+              <td><strong>Cylinder Scale Limits (10–100 mL)</strong> (Systematic)[cite: 2]</td>
+              <td>Fast reactions exceeded scale, while slow reactions fell below resolution[cite: 2].</td>
+              <td>Use a 200 mL gas syringe or balance for mass-loss tracking[cite: 1, 2, 4].</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 class="report-subheading">Suggested Extensions</h4>
+        <div class="callout-box">
+          <strong>Future Scope:</strong> Redirect testing toward measuring gas mass loss via an electronic balance (mass displacement method) to reduce volumetric apparatus errors[cite: 1, 2, 4]. Alternatively, investigate temperature variations to evaluate activation energy kinetics[cite: 2].
+        </div>
+      </div>
+
+      <!-- SUB-TAB 8: CONCLUSION -->
+      <div id="sec4-conclusion" class="sec4-tab-panel">
+        <h3 class="report-heading">Conclusion</h3>
+        <p class="report-text">
+          The experimental evidence confirms that increasing the concentration of hydrochloric acid directly increases the rate of carbon dioxide gas production when reacting with calcium carbonate[cite: 2].
+        </p>
+        <p class="report-text">
+          Reaction rates increased from 0.01 mL/s (0.1M) to 0.36 mL/s (0.5M), 0.44 mL/s (1.0M), and 0.97 mL/s (2.0M)[cite: 2]. These results align with Collision Theory, validating that higher concentration increases collision frequency[cite: 2]. Although 0.1M and 1.5M conditions suffered from high measurement uncertainty, the valid trials strong support a directly proportional relationship between concentration and reaction rate[cite: 2].
+        </p>
+      </div>
+
+      <!-- SUB-TAB 9: REFERENCES -->
+      <div id="sec4-references" class="sec4-tab-panel">
+        <h3 class="report-heading">References</h3>
+        <ul class="ref-list">
+          <li>Alviar-Agnew, M., & Agnew, H. (2025). <em>15.2: The Rate of a Chemical Reaction</em>. Chemistry LibreTexts.[cite: 2]</li>
+          <li>Britannica Editors. (2026). <em>Calcium carbonate</em>. Encyclopedia Britannica.[cite: 2]</li>
+          <li>Clark, J. (2020). <em>Reactions between acids and carbonates</em>. Chemguide.[cite: 2]</li>
+          <li>Monash University. (2025). <em>Factors Affecting Rates of Reaction</em>. Monash Student Academic Success.[cite: 2]</li>
+          <li>Muley, P. (2023). <em>Chemical Reactions Overview</em>. Chemistry LibreTexts.[cite: 2]</li>
+        </ul>
+      </div>
+
+      <!-- SUB-TAB 10: APPENDICES -->
+      <div id="sec4-appendices" class="sec4-tab-panel">
+        <h3 class="report-heading">Appendices</h3>
+        
+        <h4 class="report-subheading">Appendix 1: Original Experiment Summary</h4>
+        <p class="report-text">
+          <strong>Aim:</strong> Test the effect of surface area (powder vs chips) on rate of reaction with 0.5M HCl using water displacement[cite: 2].<br>
+          <strong>Key Finding:</strong> Powder produced 67 mL CO₂ over 5 min (1.47 mL/30s), whereas chips produced 1 mL CO₂ total (0.03 mL/30s)[cite: 2].
+        </p>
+
+        <h4 class="report-subheading">Appendix 2: Complete Risk Assessment Summary</h4>
+        <p class="report-text">
+          Certified via RiskAssess for Year 10 Chemistry Lab operations[cite: 2]. Inherent Risk: Medium. Control Measures: Eye protection, lab coats, immediate cleanup of spills, acid waste neutralizing disposal[cite: 2]. Residual Risk: Low[cite: 2].
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: REFERENCE & CALCULATIONS -->
+  <div class="tab-panel" id="tabRef">
+    <div class="ref-grid">
+      <div class="ref-card">
+        <h4>Surface Area Extended Relative Scale Table</h4>
+        <p style="font-size:12.5px; color:var(--ink-soft);">Use this specific classification if extending surface area to 5 variations:</p>
+        <table class="custom-table">
+          <thead><tr><th>Sample</th><th>Description</th><th>Relative Surface Area</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1</strong></td><td>Very fine powder</td><td><strong>Very high</strong></td></tr>
+            <tr><td><strong>2</strong></td><td>Fine granules</td><td><strong>High</strong></td></tr>
+            <tr><td><strong>3</strong></td><td>Small chunks</td><td><strong>Moderate</strong></td></tr>
+            <tr><td><strong>4</strong></td><td>Medium-sized chunks</td><td><strong>Low</strong></td></tr>
+            <tr><td><strong>5</strong></td><td>Large chunks</td><td><strong>Very low</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-card">
+        <h4>Required Statistical & Rate Calculations</h4>
+        <div class="formula-row"><span class="fname">Rate of Reaction (Initial/Mean)</span><span class="fval">Δ Mass or Δ Volume ÷ Δ Time</span></div>
+        <div class="formula-row"><span class="fname">Mean (Average)</span><span class="fval">x̄ = (x₁ + x₂ + x₃) ÷ 3</span></div>
+        <div class="formula-row"><span class="fname">Absolute Uncertainty</span><span class="fval">u = ± (Max − Min) ÷ 2</span></div>
+        <div class="formula-row"><span class="fname">Percentage Uncertainty</span><span class="fval">%u = (Absolute u ÷ Mean) × 100</span></div>
+        <p style="font-size:12px; color:var(--ink-soft); margin-top:10px;"><em>Note: Flag failed trials (e.g., gas leaks or bad mass readings), exclude them from the mean, state the reason in a table footnote, and recalculate uncertainty[cite: 2].</em></p>
+      </div>
+
+      <div class="ref-card">
+        <h4>Word Count Inclusion / Exclusion Rules</h4>
+        <table class="custom-table">
+          <thead><tr><th>Included in Word Count</th><th>Excluded from Word Count</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Body text, section headings, explanatory text inside figures/tables, direct quotes, footnote explanations.</td>
+              <td>Title page, Contents page, Reference list, Table headers & raw/processed numerical data cells, in-text citations.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-card">
+        <h4>Risk Assessment Checklist</h4>
+        <table class="custom-table">
+          <thead><tr><th>Hazard</th><th>Specific Risk</th><th>Control Measure</th></tr></thead>
+          <tbody>
+            <tr><td>Hydrochloric Acid (HCl)</td><td>Skin irritation / corrosive to eyes</td><td>Wear safety goggles, lab coat, gloves; handle with care.</td></tr>
+            <tr><td>Calcium Carbonate (CaCO₃)</td><td>Dust inhalation / eye irritant</td><td>Avoid creating dust, wear eye protection.</td></tr>
+            <tr><td>Glassware</td><td>Cuts from breakage</td><td>Inspect glassware before use, clear spills immediately.</td></tr>
+            <tr><td>Water Bath / Heat</td><td>Scalding / hot surfaces (Temp path)</td><td>Use heat-resistant gloves, handle tongs carefully.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-card wc-card">
+        <h4>Report Word Counter</h4>
+        <p class="sec-purpose" style="margin-bottom:10px;">Paste your draft report text below to check compliance against the official word limit (usually up to 1800 words).</p>
+        <textarea class="wc-input" id="wcInput" placeholder="Paste your report text here…" oninput="updateWordCount()"></textarea>
+        <div class="wc-result">
+          <div class="wc-stat"><div class="num" id="wcCount">0</div><div class="lbl">words counted</div></div>
+          <div class="wc-stat"><div class="num" id="wcRemaining">1800</div><div class="lbl">remaining (1800 max)</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Chemistry Student Experiment Companion Tool — Rate of Reaction (CaCO₃ + HCl). Designed to map directly to Instrument-Specific Marking Guide (ISMG) criteria[cite: 7].
+  </footer>
+</div>
+
+<script>
+(function() {
+
+  /* ---------------- DATA ---------------- */
+
+  var SECTIONS = [
+    {
+      id: "rationale",
+      title: "1. Rationale",
+      purpose: "Provide the theoretical foundation connecting Collision Theory, reaction kinetics, and original practical limitations.",
+      ismg: "Research and Planning (Forming) [Marks 5/5]",
+      ismgText: 'Applies chemical concepts, theories, and models to develop <span class="tooltip-term">a considered rationale for the experiment</span>.',
+      bullets: [
+        "<strong>Paragraph 1 (General Background & Concepts):</strong> Introduce chemical reactions, their importance, and reaction rate ($\text{Rate} = \Delta\text{Quantity}/\Delta t$). Explain Collision Theory ($E_a$, collision frequency, orientation) and factors affecting rates. Include balanced chemical equations and in-text referencing.",
+        "<strong>Paragraph 2 (Original Experiment & Limitations):</strong> Briefly describe the original experiment (cite 'see Appendix 1 for the full methodology of the original experiment'). Summarize its findings. Conclude with: <em>'There were a number of significant limitations associated with the original experiment (see Table 1), which have been addressed in the modified experiment.'</em>",
+        "<strong>Paragraph 3 (Modified Experiment & RQ Link):</strong> State the aim of your modified experiment and explain relevant scientific concepts (e.g., concentration). Briefly justify what was modified and why (linking to Table 1). Conclude directly with: <em>'Therefore, the following research question was developed: [insert research question here].'</em>"
+      ],
+      length: "300–450 words."
+    },
+    {
+      id: "rq",
+      title: "2. Research Question",
+      purpose: "State a fully specific, actionable research question defining the exact chemical system and variable ranges.",
+      ismg: "Research and Planning (Forming) [Marks 5/5]",
+      ismgText: "Requires a logical rationale, refined research question, and justified modification that allows collection of sufficient, relevant primary data.",
+      bullets: [
+        "Include full chemical names and reaction system: Calcium Carbonate (CaCO₃) and Hydrochloric Acid (HCl).",
+        "State the Independent Variable specifying all 5 variations (e.g., concentrations 0.1 M to 2.0 M).",
+        "State the Dependent Variable clearly (e.g., volume of CO₂ gas evolved in cm³ over time OR loss of mass in grams).",
+        "Specify key controlled variables within the question (e.g., constant temperature at 21.0°C and 0.50 g CaCO₃ mass).",
+        "Ensure it is framed as a testable relationship, not a simple yes/no inquiry."
+      ],
+      length: "~40–60 words (1 clear sentence)."
+    },
+    {
+      id: "mods",
+      title: "3. Modifications to Methodology",
+      purpose: "Explicitly detail how the original practical was Refined, Extended, or Redirected to address targeted limitations.",
+      ismg: "Research and Planning (Forming) [Marks 5/5]",
+      ismgText: "Modifications must be justified and demonstrate how they improve the quality, scope, or precision of the data collected.",
+      bullets: [
+        "Include Table 1: <strong>Limitation of Original → Specific Modification → Justification</strong>.",
+        "Explicitly label modifications as <em>Refinement</em>, <em>Extension</em>, or <em>Redirection</em>.",
+        "Detail your modifications: (1) Mandatory 3 trials for precision; (2) Choice of IV modification; (3) Choice of Refinement.",
+        "Present a clear Variable Table listing Independent, Dependent, and Controlled Variables."
+      ],
+      length: "100–200 words plus tables."
+    },
+    {
+      id: "risk",
+      title: "4. Risk Assessment",
+      purpose: "Evaluate safety, ethical, and environmental considerations associated with chemicals and apparatus.",
+      ismg: "Research and Planning (Forming) & Finding [Marks 5/5]",
+      ismgText: "Demonstrates considered management of risks, ethical issues, and environmental impacts.",
+      bullets: [
+        "Provide a Risk Assessment table listing Hazards (HCl, CaCO₃ dust, glassware), Specific Risks, and Control Measures.",
+        "<strong>Environmental Consideration:</strong> Outline safe neutralization and disposal of acidic solutions down the sink with copious water.",
+        "<strong>Ethical Consideration:</strong> State explicitly that no living organisms or ethical issues are impacted by this chemical inquiry."
+      ],
+      length: "75–150 words."
+    },
+    {
+      id: "results",
+      title: "5. Results",
+      purpose: "Present all primary quantitative data, uncertainty calculations, and graphical representations.",
+      ismg: "Analysis of Evidence (Finding & Analysing) [Marks 5/5]",
+      ismgText: "Collection of sufficient primary data, correct calculation of uncertainties, and appropriate data processing.",
+      bullets: [
+        "<strong>Raw Data Table:</strong> Record raw values across all 5 variations for 3 trials. Include measurement uncertainties in headers.",
+        "<strong>Handling Failed Trials:</strong> Flag any anomalous or failed trial, exclude it from the calculated mean, explain why in a footnote, and recalculate uncertainty.",
+        "<strong>Sample Calculations:</strong> Provide explicit worked examples for Mean, Reaction Rate, Absolute Uncertainty, and Percentage Uncertainty.",
+        "<strong>Processed Data Table & Graphs:</strong> Present processed means alongside calculated uncertainties and graph rate trends."
+      ],
+      length: "Data tables + 150–250 words explanation."
+    },
+    {
+      id: "analysis",
+      title: "6. Analysis and Interpretation",
+      purpose: "Analyse trends, relationships, and theoretical connections in the processed data.",
+      ismg: "Analysis of Evidence (Analysing & Interpreting) [Marks 5/5]",
+      ismgText: "Systematic analysis of data trends and identification of chemical relationships supported by collision theory.",
+      bullets: [
+        "Describe key patterns observed across all variations and trials.",
+        "Relate quantitative outcomes back to collision theory principles.",
+        "Discuss initial rates versus rate changes over time as reactants are depleted."
+      ],
+      length: "200–300 words."
+    },
+    {
+      id: "eval",
+      title: "7. Evaluation",
+      purpose: "Evaluate data reliability, experimental limitations, systematic/random errors, and propose improvements.",
+      ismg: "Conclusion and Evaluation [Marks 5/5]",
+      ismgText: "Evaluates investigation processes, identifies limitations, uncertainties, and errors, and suggests justified improvements.",
+      bullets: [
+        "<strong>Reliability & Uncertainty Evaluation:</strong> Discuss calculated % uncertainty across variations. Flag high-uncertainty areas.",
+        "<strong>Systematic & Random Errors:</strong> Categorize specific sources of experimental error and assess their impact.",
+        "<strong>Improvements & Extensions:</strong> Recommend targeted methodological improvements and future research extensions."
+      ],
+      length: "300–450 words."
+    },
+    {
+      id: "conclusion",
+      title: "8. Conclusion",
+      purpose: "Provide a concise summary answering the research question directly based on evidence.",
+      ismg: "Conclusion and Evaluation [Marks 5/5]",
+      ismgText: "Provides a clear conclusion directly addressing the research question, supported by experimental evidence.",
+      bullets: [
+        "State direct answer to the Research Question.",
+        "Summarize key quantitative rate values across variations.",
+        "Reiterate alignment with theoretical collision model."
+      ],
+      length: "100–150 words."
+    },
+    {
+      id: "references",
+      title: "9. References",
+      purpose: "List all academic sources and references in proper APA format.",
+      ismg: "Communication [Marks 2/2]",
+      ismgText: "Appropriate use of academic conventions including correct referencing.",
+      bullets: [
+        "Provide full bibliographic details for all cited literature.",
+        "Format entries using standard APA style."
+      ],
+      length: "N/A (Excluded from word count)."
+    },
+    {
+      id: "appendices",
+      title: "10. Appendices",
+      purpose: "Include supplementary information such as original preliminary data and full risk assessment certificates.",
+      ismg: "Communication [Marks 2/2]",
+      ismgText: "Clear presentation of supplementary material supporting the primary report.",
+      bullets: [
+        "<strong>Appendix 1:</strong> Preliminary experiment details and baseline findings.",
+        "<strong>Appendix 2:</strong> RiskAssess documentation or extended raw data logs."
+      ],
+      length: "N/A (Excluded from word count)."
+    }
+  ];
+
+  var state = {
+    checkedSections: {}
+  };
+
+  /* ---------------- INTERACTION FUNCTIONS ---------------- */
+
+  window.switchTab = function(tabId) {
+    var btns = document.querySelectorAll('.tabs .tab-btn');
+    var panels = document.querySelectorAll('.tab-panel');
+    btns.forEach(function(b) { b.classList.remove('active'); });
+    panels.forEach(function(p) { p.classList.remove('active'); });
+
+    if (tabId === 'guide') {
+      document.getElementById('tabBtnGuide').classList.add('active');
+      document.getElementById('tabGuide').classList.add('active');
+    } else if (tabId === 'report') {
+      document.getElementById('tabBtnReport').classList.add('active');
+      document.getElementById('tabReport').classList.add('active');
+    } else if (tabId === 'ref') {
+      document.getElementById('tabBtnRef').classList.add('active');
+      document.getElementById('tabRef').classList.add('active');
+    }
+  };
+
+  window.openSec4Tab = function(evt, tabId) {
+    var panels = document.querySelectorAll('#tabReport .sec4-tab-panel');
+    panels.forEach(function(p) { p.classList.remove('active'); });
+
+    var btns = document.querySelectorAll('#tabReport .sec4-tab-btn');
+    btns.forEach(function(b) { b.classList.remove('active'); });
+
+    document.getElementById(tabId).classList.add('active');
+    evt.currentTarget.classList.add('active');
+  };
+
+  window.toggleSectionDone = function(secId) {
+    var cb = document.getElementById('cb-' + secId);
+    state.checkedSections[secId] = cb.checked;
+    
+    var navLink = document.getElementById('nav-' + secId);
+    if (cb.checked) {
+      navLink.classList.add('done');
+    } else {
+      navLink.classList.remove('done');
+    }
+    updateProgress();
+  };
+
+  function updateProgress() {
+    var count = 0;
+    SECTIONS.forEach(function(s) {
+      if (state.checkedSections[s.id]) count++;
+    });
+    var total = SECTIONS.length;
+    var pct = Math.round((count / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = count + ' / ' + total + ' sections marked done';
+  }
+
+  window.updateWordCount = function() {
+    var text = document.getElementById('wcInput').value.trim();
+    var words = text ? text.split(/\s+/).length : 0;
+    document.getElementById('wcCount').textContent = words;
+    document.getElementById('wcRemaining').textContent = 1800 - words;
+  };
+
+  /* ---------------- RENDER GUIDE SECTIONS ---------------- */
+
+  function renderGuide() {
+    var navContainer = document.getElementById('sectionNav');
+    var listContainer = document.getElementById('sectionList');
+
+    var ol = document.createElement('ol');
+    SECTIONS.forEach(function(sec, idx) {
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#sec-' + sec.id;
+      a.id = 'nav-' + sec.id;
+      a.textContent = (idx + 1) + '. ' + sec.title.replace(/^\d+\.\s*/, '');
+      li.appendChild(a);
+      ol.appendChild(li);
+
+      var details = document.createElement('details');
+      details.className = 'section';
+      details.id = 'sec-' + sec.id;
+      if (idx === 0) details.open = true;
+
+      var summary = document.createElement('summary');
+      summary.innerHTML = 
+        '<span class="chev">▶</span>' +
+        '<span class="sec-num">' + (idx + 1) + '.</span>' +
+        '<div class="sec-head">' +
+          '<h3>' + sec.title.replace(/^\d+\.\s*/, '') + '</h3>' +
+          '<div class="sec-purpose">' + sec.purpose + '</div>' +
+        '</div>' +
+        '<label class="sec-check" onclick="event.stopPropagation()">' +
+          '<input type="checkbox" id="cb-' + sec.id + '" onchange="toggleSectionDone(\'' + sec.id + '\')"> Done' +
+        '</label>';
+
+      var body = document.createElement('div');
+      body.className = 'sec-body';
+
+      var ismgHtml = 
+        '<div class="ismg-box">' +
+          '<div class="ismg-criteria">' + sec.ismg + '</div>' +
+          '<strong>Key Requirement:</strong> ' + sec.ismgText +
+        '</div>';
+
+      var bulletsHtml = '<ul>';
+      sec.bullets.forEach(function(b) {
+        bulletsHtml += '<li>' + b + '</li>';
+      });
+      bulletsHtml += '</ul>';
+
+      var lengthHtml = '<div class="length-note">Recommended Section Length: ' + sec.length + '</div>';
+
+      body.innerHTML = ismgHtml + bulletsHtml + lengthHtml;
+      details.appendChild(summary);
+      details.appendChild(body);
+      listContainer.appendChild(details);
+    });
+    navContainer.appendChild(ol);
+  }
+
+  // Initialize guide rendering on DOM ready
+  renderGuide();
+
+})();
+</script>
+</body>
+</html>
