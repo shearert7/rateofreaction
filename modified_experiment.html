@@ -67,9 +67,36 @@
       padding: 0 24px 40px;
     }
 
+    /* Back Navigation Button */
+    .top-nav {
+      padding-top: 20px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--teal-deep);
+      background: var(--white);
+      border: 1px solid var(--line);
+      padding: 6px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .back-btn:hover {
+      background: var(--paper-deep);
+      border-color: var(--teal);
+      color: var(--rust);
+    }
+
     /* Header matching Section 1 */
     header.hero {
-      padding: 24px 0 16px;
+      padding: 16px 0 16px;
       border-bottom: 1px solid var(--line);
     }
 
@@ -285,6 +312,16 @@
       font-size: 13.5px;
     }
 
+    .report-note-box {
+      background: var(--sage-soft);
+      border-left: 4px solid var(--sage);
+      padding: 12px 16px;
+      border-radius: 0 4px 4px 0;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--teal-deep);
+    }
+
     .spec-list {
       margin: 8px 0 16px 20px;
       padding: 0;
@@ -360,7 +397,12 @@
 <body>
 
 <div class="wrap">
-  
+
+  <!-- BACK TO MAIN SUITE BUTTON -->
+  <nav class="top-nav">
+    <a href="index.html" class="back-btn">← Back to Main Suite</a>
+  </nav>
+
   <header class="hero">
     <div class="eq-badge">
       <div>Calcium Carbonate (s) + Hydrochloric Acid (aq) → Calcium Chloride (aq) + Carbon Dioxide (g) + Water (l)</div>
@@ -480,6 +522,11 @@
 
     <div class="table-container" id="sheets-table-preview">
       <!-- Dynamic rendering via JavaScript -->
+    </div>
+
+    <!-- NOTE AFTER DATA TABLE -->
+    <div class="report-note-box">
+      <strong>📌 Report Note:</strong> This completed data table goes directly into the <strong>Raw Data</strong> section of your final scientific report.
     </div>
   </div>
 
